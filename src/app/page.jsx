@@ -36,7 +36,7 @@ export default function Home() {
           onClick={() => window.location.reload()}
           className="text-2xl sm:text-3xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-500 cursor-pointer drop-shadow-md hover:scale-105 transition"
         >
-          ASTROSPHERE
+          AASTROSPHERE
         </h1>
 
         {/* Right CTA Button */}
