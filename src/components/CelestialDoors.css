@@ -1,0 +1,32 @@
+.stars,
+.twinkling {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  background: transparent;
+  z-index: 0;
+}
+
+.stars {
+  background: url('/stars.png') repeat;
+  animation: moveStars 100s linear infinite;
+  opacity: 0.7;
+}
+
+.twinkling {
+  background: url('/twinkling.png') repeat;
+  animation: moveTwinkling 150s linear infinite;
+  opacity: 0.4;
+}
+
+@keyframes moveStars {
+  from { transform: translate(0, 0); }
+  to { transform: translate(-50%, -50%); }
+}
+
+@keyframes moveTwinkling {
+  from { transform: translate(0, 0); }
+  to { transform: translate(50%, 50%); }
+}
