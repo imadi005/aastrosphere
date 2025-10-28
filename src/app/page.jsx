@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Zodiac3DScene } from '@/components/Zodiac3DScene';
+import { Canvas } from '@react-three/fiber';
 import CelestialDoors from '@/components/CelestialDoors';
+import { CenterOrb } from '@/components/CenterOrb';
 import EntryForm from '@/components/EntryForm';
 import NumerologyChart from '@/components/NumerologyChart';
 
@@ -21,44 +22,47 @@ export default function Home() {
   };
 
   return (
-    <div className="w-screen h-screen overflow-hidden relative bg-black font-sans">
-      {/* 🌌 Dynamic gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black via-[#0f172a] to-black animate-pulse z-0 pointer-events-none" />
+    <div className="relative w-screen h-screen overflow-hidden bg-[var(--bg-primary)] font-sans">
+      {/* 🌌 Animated deep-space gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg-primary)] via-[#0f172a] to-black animate-pulse opacity-90 pointer-events-none" />
 
-      {/* 🌠 3D Scene + Celestial Doors */}
-      <Zodiac3DScene doorsOpen={doorsOpen} />
+      {/* 🌠 Cosmic background (stars / glowing orb / wheel) */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        {/* keep all cosmic visuals here */}
+        <div className="fixed inset-0 -z-10">
+  <Canvas camera={{ position: [0, 0, 3] }}>
+    <ambientLight intensity={0.5} />
+    <pointLight position={[10, 10, 10]} intensity={1.2} />
+    <CenterOrb />
+  </Canvas>
+</div>
+      </div>
+
+      {/* 🚪 Celestial door animation */}
       <CelestialDoors onDoorsOpen={handleDoorsOpen} />
+     
 
-      {/* 💜 Dynamic Header */}
-      <div className="fixed top-0 left-0 w-full z-50 px-6 py-4 flex items-center justify-between bg-gradient-to-r from-[#2e1065] via-purple-700 to-[#6b21a8] shadow-lg border-b border-purple-400/30 backdrop-blur-md">
-        {/* Left Logo - Home */}
+      {/* 🌟 Header — Minimal Premium Branding */}
+      <header className="fixed top-0 left-0 w-full z-50 px-6 py-4 flex items-center justify-between bg-[var(--bg-surface)]/50 border-b border-[var(--line)] backdrop-blur-xl shadow-glow">
         <h1
           onClick={() => window.location.reload()}
-          className="text-2xl sm:text-3xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-500 cursor-pointer drop-shadow-md hover:scale-105 transition"
+          className="text-2xl sm:text-3xl font-[Cinzel] tracking-wide text-[var(--accent-gold)] cursor-pointer hover:text-[var(--accent-gold-light)] transition-transform duration-300 hover:scale-105"
         >
           AASTROSPHERE
         </h1>
+      </header>
 
-        {/* Right CTA Button */}
-        <button
-          onClick={() => alert('🔮 Connecting to Astrologer...')}
-          className="px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-700 text-white font-semibold text-sm rounded-lg shadow hover:from-purple-600 hover:to-purple-800 transition"
-        >
-          🧙 Contact Astrologer
-        </button>
-      </div>
-
-      {/* 📝 Entry Form */}
+      {/* 🪶 Entry form overlay */}
       {showForm && !formData && (
-        <div className="fixed top-0 left-0 w-screen h-screen z-[60] flex items-center justify-center">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center">
           <EntryForm onSubmit={handleFormSubmit} />
         </div>
       )}
 
-      {/* 📊 Numerology Result Chart */}
+      {/* 📊 Numerology Chart Output */}
       {formData && (
-        <div className="absolute top-0 left-0 w-full min-h-screen z-40 p-4 pt-28 sm:pt-24 flex flex-col items-center bg-black/80 overflow-y-auto">
-          <div className="mt-10 w-full max-w-4xl px-4">
+        <div className="absolute top-0 left-0 w-full min-h-screen z-40 flex flex-col items-center bg-[var(--bg-primary)]/90 overflow-y-auto">
+          <div className="w-full max-w-4xl px-4 pt-28 sm:pt-24 pb-10">
             <NumerologyChart dob={formData.dob} />
           </div>
         </div>

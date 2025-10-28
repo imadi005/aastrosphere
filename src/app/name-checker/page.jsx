@@ -1,6 +1,7 @@
+// name-checker/page.jsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // Numerology letter mapping
 const letterValues = {
@@ -20,6 +21,9 @@ const favorableNumbers = {
 
 // Converts a name part to its letters, mapped numbers and sum.
 function computeNameDigits(namePart) {
+  if (!namePart || namePart.trim() === '') {
+    return { letters: [], digits: [], sum: 0 };
+  }
   const letters = namePart.toUpperCase().replace(/[^A-Z]/g, '').split('');
   const digits = letters.map((l) => letterValues[l] || 0);
   const sum = digits.reduce((a, b) => a + b, 0);
@@ -28,41 +32,53 @@ function computeNameDigits(namePart) {
 
 // Reduce a number to single digit by summing its digits repeatedly.
 function reduceToSingleDigit(num) {
-  while (num > 9) {
-    num = String(num)
+  let n = num;
+  while (n > 9) {
+    n = String(n)
       .split('')
-      .reduce((acc, n) => acc + parseInt(n, 10), 0);
+      .reduce((acc, digit) => acc + parseInt(digit, 10), 0);
   }
-  return num;
+  return n;
 }
 
 // Calculate Destiny Number from the DOB (format: YYYY-MM-DD)
 function calculateDestinyNumber(dob) {
-  const parts = dob.split('-');
-  if (parts.length !== 3) return null;
-  const [year, month, day] = parts.map(Number);
-  const digits = [...String(day), ...String(month), ...String(year)].map(Number);
+  if (!dob) return null;
+  
+  // Handle both YYYY-MM-DD and DD-MM-YYYY formats
+  let day, month, year;
+  
+  if (dob.includes('-')) {
+    const parts = dob.split('-');
+    if (parts[0].length === 4) {
+      // YYYY-MM-DD format
+      [year, month, day] = parts.map(Number);
+    } else {
+      // DD-MM-YYYY format
+      [day, month, year] = parts.map(Number);
+    }
+  } else {
+    return null;
+  }
+
+  const digits = [
+    ...String(day).split('').map(Number),
+    ...String(month).split('').map(Number),
+    ...String(year).split('').map(Number)
+  ];
+  
   const sum = digits.reduce((a, b) => a + b, 0);
   return reduceToSingleDigit(sum);
 }
 
 /**
- * Generate corrected name suggestions with minimal modifications.
- * This function will try to alter the first and last name using vowel-doubling and, if needed,
- * soft consonant swaps. It forces a loop to generate *at least 3* unique suggestions.
- *
- * @param {string} first - The first name.
- * @param {string} last - The last name.
- * @param {number} destiny - The destiny number.
- * @returns {Array} Array of suggestions each as an object { name, sum, reduced }.
+ * Generate corrected name suggestions
  */
 function generateMinimalCorrectedNames(first, last, destiny) {
   const allowed = favorableNumbers[destiny] || favorableNumbers.default;
   const vowels = ['A', 'E', 'I', 'O', 'U'];
   const corrections = new Set();
 
-  // A helper function that attempts a variant given a first and last name;
-  // it computes the sum and reduced value. If it’s allowed, it adds to suggestions.
   const tryVariant = (variantFirst, variantLast) => {
     const combined = (variantFirst + variantLast).toUpperCase().replace(/[^A-Z]/g, '');
     const sum = combined.split('').reduce((acc, ch) => acc + (letterValues[ch] || 0), 0);
@@ -78,48 +94,28 @@ function generateMinimalCorrectedNames(first, last, destiny) {
     }
   };
 
-  const baseFirst = first.trim();
-  const baseLast = last.trim();
+  const baseFirst = (first || '').trim();
+  const baseLast = (last || '').trim();
 
-  // Generate vowel-doubling variants for a name part up to a given depth
-  const getVowelVariants = (name, depth) => {
-    const variants = new Set();
-    // Base variant
-    variants.add(name);
-    // For each depth, try doubling each vowel position; do it iteratively.
-    for (let d = 0; d < depth; d++) {
-      const newVariants = new Set();
-      variants.forEach((variant) => {
-        for (let i = 0; i < variant.length; i++) {
-          const char = variant[i];
-          if (vowels.includes(char.toUpperCase())) {
-            const newVariant = variant.slice(0, i + 1) + char + variant.slice(i + 1);
-            newVariants.add(newVariant);
-          }
-        }
-      });
-      newVariants.forEach((v) => variants.add(v));
-    }
-    return Array.from(variants);
-  };
+  if (!baseFirst || !baseLast) return [];
 
-  // We attempt increasing depths until we get at least 3 corrected names or we reach maxDepth.
-  let depth = 1;
-  const maxDepth = 4;
-  while (depth <= maxDepth && corrections.size < 3) {
-    const firstVariants = getVowelVariants(baseFirst, depth);
-    const lastVariants = getVowelVariants(baseLast, depth);
-    for (let fv of firstVariants) {
-      for (let lv of lastVariants) {
-        tryVariant(fv, lv);
-        if (corrections.size >= 3) break;
-      }
-      if (corrections.size >= 3) break;
+  // Simple vowel doubling strategy
+  for (let i = 0; i < baseFirst.length && corrections.size < 3; i++) {
+    const char = baseFirst[i].toUpperCase();
+    if (vowels.includes(char)) {
+      const newFirst = baseFirst.slice(0, i + 1) + baseFirst[i] + baseFirst.slice(i + 1);
+      tryVariant(newFirst, baseLast);
     }
-    depth++;
   }
 
-  // Return the top 3 suggestions as objects (if fewer, return what we have)
+  for (let i = 0; i < baseLast.length && corrections.size < 3; i++) {
+    const char = baseLast[i].toUpperCase();
+    if (vowels.includes(char)) {
+      const newLast = baseLast.slice(0, i + 1) + baseLast[i] + baseLast.slice(i + 1);
+      tryVariant(baseFirst, newLast);
+    }
+  }
+
   return Array.from(corrections)
     .map((c) => JSON.parse(c))
     .slice(0, 3);
@@ -130,7 +126,6 @@ export default function NameChecker() {
   const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [dob, setDob] = useState('');
-  const [gender, setGender] = useState('female');
 
   const [computed, setComputed] = useState(false);
   const [destinyNumber, setDestinyNumber] = useState(null);
@@ -143,8 +138,63 @@ export default function NameChecker() {
   const [middleResult, setMiddleResult] = useState(null);
   const [lastResult, setLastResult] = useState(null);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  // URL se automatically data process karo
+  useEffect(() => {
+    const processUrlData = () => {
+      try {
+        if (typeof window !== 'undefined') {
+          const url = new URL(window.location.href);
+          const name = url.searchParams.get('name') || '';
+          const dob = url.searchParams.get('dob') || '';
+          
+          console.log('URL Params:', { name, dob });
+          
+          if (name) {
+            const nameParts = name.split(' ');
+            
+            // Smart name splitting logic
+            if (nameParts.length === 1) {
+              // Ek hi word hai - first name
+              setFirstName(nameParts[0]);
+              setMiddleName('');
+              setLastName('');
+            } else if (nameParts.length === 2) {
+              // Do words hain - first name aur last name
+              setFirstName(nameParts[0]);
+              setMiddleName('');
+              setLastName(nameParts[1]);
+            } else {
+              // Teen ya zyada words hain
+              setFirstName(nameParts[0]);
+              setMiddleName(nameParts.slice(1, -1).join(' ')); // Beech ke sab middle name
+              setLastName(nameParts[nameParts.length - 1]); // Last word last name
+            }
+          }
+          
+          if (dob) {
+            // Date format conversion if needed
+            setDob(dob);
+          }
+        }
+      } catch (error) {
+        console.error('Error processing URL params:', error);
+      }
+    };
+
+    processUrlData();
+  }, []);
+
+  // Jab bhi name ya dob change ho, automatically calculate karo
+  useEffect(() => {
+    if (firstName && dob) {
+      performCalculation();
+    }
+  }, [firstName, middleName, lastName, dob]);
+
+  const performCalculation = () => {
+    if (!firstName || !dob) return;
+
+    console.log('Auto-calculating with:', { firstName, middleName, lastName, dob });
 
     // Calculate digits for each name part
     const f = computeNameDigits(firstName);
@@ -171,7 +221,6 @@ export default function NameChecker() {
     setIsFavorable(favorable);
 
     // If not favorable, generate minimal corrected name suggestions.
-    // We ensure that we always try to generate 3 suggestions.
     if (!favorable) {
       const corrected = generateMinimalCorrectedNames(firstName, lastName, dNum);
       setSuggestions(corrected);
@@ -182,126 +231,194 @@ export default function NameChecker() {
     setComputed(true);
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    performCalculation();
+  };
+
   return (
-    <div className="h-screen w-screen overflow-auto bg-black text-white px-4 py-10 flex flex-col items-center">
-      <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-10 tracking-wide">
-        ✨ Name Numerology Checker
-      </h1>
+    <div className="min-h-screen bg-[#0b0f19] text-white px-4 py-8">
+      {/* Header */}
+      <div className="max-w-7xl mx-auto text-center mb-12">
+        <h1 className="text-5xl md:text-6xl font-bold mb-6 text-[#ffda73] tracking-tight">
+          🔮 Name Numerology Analysis
+        </h1>
+        <div className="h-1 w-40 bg-gradient-to-r from-[#d4af37] to-[#ffda73] mx-auto rounded-full"></div>
+      </div>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 max-w-7xl mx-auto">
-        <input
-          type="text"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          required
-          placeholder="First Name"
-          className="bg-gray-800 px-4 py-2 rounded-xl"
-        />
-        <input
-          type="text"
-          value={middleName}
-          onChange={(e) => setMiddleName(e.target.value)}
-          placeholder="Middle Name"
-          className="bg-gray-800 px-4 py-2 rounded-xl"
-        />
-        <input
-          type="text"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          placeholder="Last Name"
-          className="bg-gray-800 px-4 py-2 rounded-xl"
-        />
-        <input
-          type="date"
-          value={dob}
-          onChange={(e) => setDob(e.target.value)}
-          required
-          className="bg-gray-800 px-4 py-2 rounded-xl"
-        />
-        <select
-          value={gender}
-          onChange={(e) => setGender(e.target.value)}
-          className="bg-gray-800 px-4 py-2 rounded-xl"
-        >
-          <option value="female">Female</option>
-          <option value="male">Male</option>
-          <option value="other">Other</option>
-        </select>
-
-        <div className="sm:col-span-2 lg:col-span-5 mt-4 text-center">
-          <button type="submit" className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-full font-semibold text-lg transition">
-            🔍 Check My Name
-          </button>
-        </div>
-      </form>
-
-      {computed && (
-        <div className="mt-10 max-w-5xl mx-auto space-y-6">
-          {/* Detailed breakdown for each name part */}
-          {[{ label: 'First', name: firstName, result: firstResult },
-            { label: 'Middle', name: middleName, result: middleResult },
-            { label: 'Last', name: lastName, result: lastResult }]
-            .filter(part => part.name && part.result)
-            .map((part, idx) => (
-              <div key={idx} className="bg-gray-800 rounded-xl p-4 mb-6">
-                <h3 className="text-lg font-bold mb-2">{part.label} Name: {part.name}</h3>
-                <table className="w-full text-sm text-center">
-                  <thead>
-                    <tr className="bg-gray-700 text-purple-300">
-                      <th className="py-2">Letters</th>
-                      <th className="py-2">Mapped Numbers</th>
-                      <th className="py-2">Sum</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="py-2">{part.result.letters.join(' ')}</td>
-                      <td className="py-2">{part.result.digits.join(' ')}</td>
-                      <td className="py-2 font-bold text-green-400">{part.result.sum}</td>
-                    </tr>
-                  </tbody>
-                </table>
+      <div className="max-w-4xl mx-auto">
+        {/* Input Form - Still show for manual testing */}
+        <div className="bg-gradient-to-br from-[#121829] to-[#0b0f19] rounded-2xl p-8 border border-[#d4af37]/20 shadow-lg mb-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">First Name</label>
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                  className="w-full bg-[#0b0f19] border border-[#d4af37]/30 rounded-xl px-4 py-3 text-white focus:border-[#ffda73] focus:outline-none transition-colors"
+                  placeholder="Enter first name"
+                />
               </div>
-            ))}
-
-          {/* Totals & Destiny */}
-          <div className="text-center bg-gradient-to-r from-purple-800 to-purple-600 rounded-xl py-6 px-4">
-            <h3 className="text-lg font-bold text-white">💠 Total Name Sum: {finalSum}</h3>
-            <p className="text-2xl font-bold mt-1 text-yellow-300">Reduced to Single Digit: {finalNumber}</p>
-            <p className="mt-3 text-xl text-white">
-              🎯 Destiny Number (from DOB): <span className="font-bold text-cyan-300">{destinyNumber}</span>
-            </p>
-            <p className={`mt-2 text-xl font-semibold ${isFavorable ? 'text-green-400' : 'text-red-400'}`}>
-              {isFavorable ? '✅ Astrologically Favorable Name!' : '⚠️ Not Favorable As Per Destiny Number'}
-            </p>
-          </div>
-
-          {/* Corrected Name Suggestions (if not favorable) */}
-          {!isFavorable && suggestions.length > 0 && (
-            <div className="bg-gray-900 p-5 rounded-xl border border-purple-600">
-              <h3 className="text-xl text-purple-300 mb-3">🔁 Suggested Name Corrections</h3>
-              <ul className="list-disc pl-6 space-y-2">
-                {suggestions.map((sugg, idx) => (
-                  <li key={idx} className="text-lg">
-                    👉 <b>{sugg.name}</b> <span className="text-gray-400">(Sum: {sugg.sum} → {sugg.reduced})</span>
-                  </li>
-                ))}
-              </ul>
+              
+              <div>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">Middle Name</label>
+                <input
+                  type="text"
+                  value={middleName}
+                  onChange={(e) => setMiddleName(e.target.value)}
+                  className="w-full bg-[#0b0f19] border border-[#d4af37]/30 rounded-xl px-4 py-3 text-white focus:border-[#ffda73] focus:outline-none transition-colors"
+                  placeholder="Optional"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">Last Name</label>
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full bg-[#0b0f19] border border-[#d4af37]/30 rounded-xl px-4 py-3 text-white focus:border-[#ffda73] focus:outline-none transition-colors"
+                  placeholder="Enter last name"
+                />
+              </div>
             </div>
-          )}
 
-          {!isFavorable && suggestions.length === 0 && (
-            <div className="bg-red-900 p-5 rounded-xl border border-red-600 text-center">
-              <h3 className="text-xl font-semibold">
-                No minimal modifications found that yield a favorable result.
-              </h3>
-              <p className="mt-2 text-gray-200">
-                Please try manual adjustments or consult a deeper approach!
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">Date of Birth</label>
+                <input
+                  type="date"
+                  value={dob}
+                  onChange={(e) => setDob(e.target.value)}
+                  required
+                  className="w-full bg-[#0b0f19] border border-[#d4af37]/30 rounded-xl px-4 py-3 text-white focus:border-[#ffda73] focus:outline-none transition-colors"
+                />
+              </div>
+              
+              <div className="flex items-end">
+                <button 
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-[#d4af37] to-[#ffda73] text-[#0b0f19] py-3 rounded-xl font-bold text-lg hover:scale-105 transition-transform shadow-lg"
+                >
+                  🔍 Analyze Name Energy
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        {computed && (
+          <div className="space-y-6">
+            {/* Name Numerology Breakdown */}
+            <div className="bg-gradient-to-br from-[#121829] to-[#0b0f19] rounded-2xl p-6 border border-[#d4af37]/20 shadow-lg">
+              <h2 className="text-2xl font-bold mb-6 text-[#ffda73] text-center">📊 Name Numerology Breakdown</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                {[
+                  { label: 'First Name', name: firstName, result: firstResult },
+                  { label: 'Middle Name', name: middleName, result: middleResult },
+                  { label: 'Last Name', name: lastName, result: lastResult }
+                ].filter(part => part.result && part.result.sum > 0).map((part, idx) => (
+                  <div key={idx} className="bg-[#0b0f19] rounded-xl p-4 border border-[#d4af37]/10">
+                    <h3 className="font-bold text-lg mb-3 text-white">{part.label}</h3>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Letters:</span>
+                        <span className="font-mono">{part.result.letters.join(' ') || '-'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Numbers:</span>
+                        <span className="font-mono text-[#ffda73]">{part.result.digits.join(' ') || '-'}</span>
+                      </div>
+                      <div className="flex justify-between border-t border-gray-700 pt-2">
+                        <span className="text-gray-400">Sum:</span>
+                        <span className="font-bold text-lg text-green-400">{part.result.sum}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-gradient-to-r from-[#d4af37]/10 to-transparent rounded-xl p-6 border-2 border-[#d4af37]">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                  <div>
+                    <p className="text-gray-400 text-sm">Total Name Sum</p>
+                    <p className="text-3xl font-bold text-white">{finalSum}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">Reduced Number</p>
+                    <p className="text-4xl font-bold text-[#ffda73]">{finalNumber}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">Destiny Number</p>
+                    <p className="text-3xl font-bold text-cyan-300">{destinyNumber}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Result Status */}
+            <div className={`rounded-2xl p-8 border-2 shadow-lg text-center ${
+              isFavorable 
+                ? 'bg-gradient-to-r from-green-500/10 to-emerald-500/5 border-green-500' 
+                : 'bg-gradient-to-r from-red-500/10 to-rose-500/5 border-red-500'
+            }`}>
+              <h2 className="text-3xl font-bold mb-4">
+                {isFavorable ? '✅' : '⚠️'} {isFavorable ? 'Astrologically Favourable!' : 'Needs Correction'}
+              </h2>
+              <p className={`text-xl font-semibold ${isFavorable ? 'text-green-400' : 'text-red-400'}`}>
+                {isFavorable 
+                  ? 'Your name perfectly aligns with your destiny number! 🎉'
+                  : 'Your name number conflicts with your destiny energy'
+                }
               </p>
             </div>
-          )}
-        </div>
-      )}
+
+            {/* Suggestions */}
+            {!isFavorable && suggestions.length > 0 && (
+              <div className="bg-gradient-to-br from-[#121829] to-[#0b0f19] rounded-2xl p-8 border border-[#d4af37]/20 shadow-lg">
+                <h2 className="text-2xl font-bold mb-6 text-[#ffda73] text-center">✨ Suggested Corrections</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {suggestions.map((sugg, idx) => (
+                    <div key={idx} className="bg-[#0b0f19] rounded-xl p-4 border border-[#d4af37]/20 hover:border-[#ffda73] transition-all group">
+                      <div className="text-center mb-3">
+                        <h3 className="font-bold text-lg text-white group-hover:text-[#ffda73] transition-colors">
+                          {sugg.name}
+                        </h3>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-400">Sum: {sugg.sum}</span>
+                        <span className="bg-[#d4af37] text-[#0b0f19] px-3 py-1 rounded-full text-sm font-bold">
+                          → {sugg.reduced}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!isFavorable && suggestions.length === 0 && (
+              <div className="bg-gradient-to-br from-[#121829] to-[#0b0f19] rounded-2xl p-8 border border-red-500/20 shadow-lg text-center">
+                <h2 className="text-2xl font-bold mb-4 text-red-400">No Corrections Found</h2>
+                <p className="text-gray-300">
+                  Try manual adjustments or consult a numerology expert for personalized suggestions.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {!computed && firstName && dob && (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ffda73] mx-auto"></div>
+            <p className="mt-4 text-gray-400">Calculating your numerology...</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

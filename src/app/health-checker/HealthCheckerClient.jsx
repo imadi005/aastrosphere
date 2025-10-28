@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+// Data object (No changes)
 const healthData = {
   1: {
     issues: 'Headache, eye problems, migraine, heat stroke, heart problems, ENT (Ear, Nose, Throat) issues.',
@@ -42,10 +43,31 @@ const healthData = {
   }
 };
 
-export default function HealthCheckerPage() {
-  const searchParams = useSearchParams();
-  const grid = searchParams.get('grid'); // Example: "1,1,2,3,4,4,4,5,5,6"
+// UI IMPROVEMENT: Color mapping object for cleaner code
+const severityConfig = {
+  Severe: {
+    border: 'border-red-500',
+    bg: 'bg-red-900/30',
+    text: 'text-red-300',
+    badge: 'bg-red-500 text-white',
+  },
+  Moderate: {
+    border: 'border-yellow-500',
+    bg: 'bg-yellow-900/30',
+    text: 'text-yellow-300',
+    badge: 'bg-yellow-500 text-black',
+  },
+  Mild: {
+    border: 'border-green-500',
+    bg: 'bg-green-900/30',
+    text: 'text-green-300',
+    badge: 'bg-green-500 text-black',
+  },
+};
 
+export default function HealthCheckerClient() {
+  const searchParams = useSearchParams();
+  const grid = searchParams.get('grid');
   const [healthInfo, setHealthInfo] = useState([]);
 
   useEffect(() => {
@@ -69,7 +91,7 @@ export default function HealthCheckerPage() {
           number,
           count,
           severity,
-          ...healthData[number]
+          ...healthData[number],
         };
       });
 
@@ -78,36 +100,74 @@ export default function HealthCheckerPage() {
   }, [grid]);
 
   return (
-    <div className="h-screen w-screen overflow-auto bg-black text-white px-4 py-10 flex flex-col items-center">
-      <h1 className="text-4xl font-bold mb-6 text-center">🧠 Health Status Based on Numerology</h1>
+    // RESPONSIVENESS FIX: 
+    // `min-h-screen` (flexible height) instead of `h-screen`
+    // `w-full` (flexible width) instead of `w-screen`
+    // Added responsive padding: `px-4 sm:px-6 lg:px-8`
+    // Added `pt-24` (for main header) and `pb-12` (for bottom spacing)
+    <div className="min-h-screen w-full overflow-x-hidden bg-black text-white px-4 sm:px-6 lg:px-8 pt-24 pb-12 flex flex-col items-center">
+      
+      {/* RESPONSIVENESS FIX: Responsive font size */}
+      <h1 className="text-3xl sm:text-4xl font-bold mb-8 text-center">
+        🧠 Health Status Based on Numerology
+      </h1>
 
       {healthInfo.length === 0 ? (
-        <p className="text-center text-lg">No valid numbers found in chart.</p>
+        // UI IMPROVEMENT: Better empty state
+        <div className="text-center p-10 bg-gray-900/50 rounded-lg max-w-md w-full">
+          <p className="text-2xl mb-2">🤔</p>
+          <p className="text-lg text-gray-300">No Health Data Found</p>
+          <p className="text-sm text-gray-500">
+            The numerology grid might be empty or invalid.
+          </p>
+        </div>
       ) : (
-        <div className="max-w-4xl mx-auto space-y-6">
-          {healthInfo.map(({ number, count, severity, issues, analysis }) => (
-            <div
-              key={number}
-              className={`p-6 rounded-lg shadow-md border-l-8 ${
-                severity === 'Severe'
-                  ? 'border-red-600 bg-red-900/20'
-                  : severity === 'Moderate'
-                  ? 'border-yellow-500 bg-yellow-900/20'
-                  : 'border-green-500 bg-green-900/20'
-              }`}
-            >
-              <h2 className="text-xl font-bold mb-2">
-                Number {number} — <span className="capitalize">{severity} Issue</span>
-              </h2>
-              <p className="text-sm text-gray-300 mb-1">Occurrences in chart: {count}</p>
-              <p className="text-white mb-1">
-                <b>Symptoms:</b> {issues}
-              </p>
-              <p className="text-white text-sm italic opacity-90">
-                <b>Analysis:</b> {analysis}
-              </p>
-            </div>
-          ))}
+        // UI IMPROVEMENT: Changed max-w-4xl to 3xl for better readability
+        <div className="w-full max-w-3xl mx-auto space-y-6">
+          {healthInfo.map(({ number, count, severity, issues, analysis }) => {
+            const colors = severityConfig[severity];
+            return (
+              <div
+                key={number}
+                className={`rounded-lg shadow-2xl border-l-8 p-6 ${colors.border} ${colors.bg} transition-all duration-300 hover:shadow-purple-900/50`}
+              >
+                {/* UI IMPROVEMENT: Better header with number and severity badge */}
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2 sm:mb-0">
+                    Number {number}
+                  </h2>
+                  <span
+                    className={`px-3 py-1 text-sm font-semibold rounded-full ${colors.badge} w-fit`}
+                  >
+                    {severity} Issue
+                  </span>
+                </div>
+
+                {/* UI IMPROVEMENT: Clearer labels for Symptoms and Analysis */}
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                      Symptoms
+                    </h3>
+                    <p className="text-gray-200">{issues}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                      Analysis
+                    </h3>
+                    <p className="text-gray-300 italic opacity-90">
+                      {analysis}
+                    </p>
+                  </div>
+                </div>
+
+                {/* UI IMPROVEMENT: Moved count to the bottom as metadata */}
+                <p className="text-xs text-gray-500 mt-4 text-right">
+                  Occurrences in chart: {count}
+                </p>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
