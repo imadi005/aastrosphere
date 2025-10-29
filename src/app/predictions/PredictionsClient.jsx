@@ -1,8 +1,30 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
+// Brand Colors - Cosmic Theme
+const brandColors = {
+  primaryBg: '#0b0f19',        // Midnight Blue / Cosmic Black
+  secondaryBg: '#121829',      // Space Indigo
+  accentGold: '#d4af37',       // Rich Gold
+  highlightGold: '#ffda73',    // Soft Golden Yellow
+  textWhite: '#ffffff',        // Pure White
+  neutralGray: '#b0b0b0',      // Soft Gray
+  success: '#2ecc71',          // Emerald Green
+  warning: '#ff4d4d',          // Rose Red
+  accentCyan: '#00ffff',       // Celestial Cyan
+  maha: '#d4af37',             // Gold for Mahadasha
+  antar: '#2ecc71',            // Green for Antardasha
+  regular: '#3b82f6',          // Blue for Regular numbers
+};
+
+// Helper function for date duration
+const getDuration = (start, end) => {
+  return `${start} - ${end}`;
+};
+
+// Number Position Mapping
 const numberPositionMap = {
   1: [0, 1],
   2: [2, 0],
@@ -15,293 +37,281 @@ const numberPositionMap = {
   9: [0, 2],
 };
 
-// Full prediction library — already pasted above
+// Full prediction library
 const predictionLibrary = {
+  1: {
     1: {
-      1: {
-        label: "Solar Spark — confident but growing",
-        positives: [' Leadership', 'Independence', 'Ambition'],
-        negatives: ['Impatience', 'Ego clashes'],
-        advice: 'Stay humble. Lead with vision, not control.',
-      },
-      2: {
-        label: 'Double Sun — assertive, radiant force',
-        positives: ['Natural leadership', 'Bold expression'],
-        negatives: ['Authoritarian tendency', 'Resistant to guidance'],
-        advice: 'Channel your authority into service, not power.',
-      },
-      3: {
-        label: 'Triple Sun — dominant presence',
-        positives: ['Magnetism', 'Public recognition'],
-        negatives: ['Overbearing', 'Inflexible'],
-        advice: 'Balance your shine with collaboration.',
-      },
-      4: {
-        label: 'Blazing Star — intense drive to lead',
-        positives: ['Visionary power', 'Trailblazer'],
-        negatives: ['Isolation', 'Leadership burnout'],
-        advice: 'Rest, delegate, and share responsibility.',
-      },
+      label: "Solar Spark — confident but growing",
+      positives: [' Leadership', 'Independence', 'Ambition'],
+      negatives: ['Impatience', 'Ego clashes'],
+      advice: 'Stay humble. Lead with vision, not control.',
     },
     2: {
-      1: {
-        label: 'Lunar Calm — sensitive and kind',
-        positives: ['Empathy', 'Creativity', 'Harmony'],
-        negatives: ['Emotional overload', 'Dependency'],
-        advice: 'Use art or journaling to stay emotionally grounded.',
-      },
-      2: {
-        label: 'Double Moon — deep emotional soul',
-        positives: ['Deep understanding', 'Spiritual bonds'],
-        negatives: ['Mood swings', 'Unspoken resentment'],
-        advice: 'Practice emotional boundaries. Speak your truth.',
-      },
-      3: {
-        label: 'Triple Moon — intuitive mystic',
-        positives: ['Spiritual depth', 'Emotional wisdom'],
-        negatives: ['Hypersensitivity', 'Confusion in decisions'],
-        advice: 'Seek clarity before emotional reaction.',
-      },
-      4: {
-        label: 'Mystic Waters — flow of empathy',
-        positives: ['Healer energy', 'Inner vision'],
-        negatives: ['Psychic overload', 'Escape tendency'],
-        advice: 'Protect your energy. Channel into healing work.',
-      },
+      label: 'Double Sun — assertive, radiant force',
+      positives: ['Natural leadership', 'Bold expression'],
+      negatives: ['Authoritarian tendency', 'Resistant to guidance'],
+      advice: 'Channel your authority into service, not power.',
     },
     3: {
-      1: {
-        label: 'Joyful Spark — creative thinker',
-        positives: ['Optimism', 'Communication', 'Humor'],
-        negatives: ['Scattered focus', 'Overtalking'],
-        advice: 'Ground your ideas. Let action follow expression.',
-      },
-      2: {
-        label: 'Dual 3 — verbal mastery needing depth',
-        positives: ['Emotional IQ', 'Persuasive tone'],
-        negatives: ['Overexplaining', 'Emotional detachment'],
-        advice: 'Pause before response. Create room for others.',
-      },
-      3: {
-        label: 'Triple 3 — creative whirlwind',
-        positives: ['Entrepreneur mind', 'Sharp wit'],
-        negatives: ['Burnout risk', 'Overcommitment'],
-        advice: 'Create space to rest and reflect regularly.',
-      },
-      4: {
-        label: 'Storm of Ideas — powerful voice',
-        positives: ['Marketing genius', 'Movement starter'],
-        negatives: ['Inconsistency', 'Career instability'],
-        advice: 'Ground yourself in value, not applause.',
-      },
+      label: 'Triple Sun — dominant presence',
+      positives: ['Magnetism', 'Public recognition'],
+      negatives: ['Overbearing', 'Inflexible'],
+      advice: 'Balance your shine with collaboration.',
     },
     4: {
-      1: {
-        label: 'Rahu’s Order — builder and planner',
-        positives: ['Hardworking', 'Loyal', 'Logical'],
-        negatives: ['Rigidity', 'Overwork'],
-        advice: 'Allow for flow. Adaptation is your key to success.',
-      },
-      2: {
-        label: 'Double 4 — karmic foundation',
-        positives: ['Structured life', 'Security'],
-        negatives: ['Resistance to change', 'Stubborn behavior'],
-        advice: 'Let go of control in uncertain paths.',
-      },
-      3: {
-        label: 'Triple 4 — path of tests',
-        positives: ['Master builder energy', 'Persistence'],
-        negatives: ['Delays', 'Overthinking'],
-        advice: 'Focus on progress, not perfection.',
-      },
-      4: {
-        label: 'Sacred Architect — intense discipline',
-        positives: ['Legacy maker', 'Mentor archetype'],
-        negatives: ['Loneliness', 'Emotional distance'],
-        advice: 'Invite joy and spontaneity.',
-      },
+      label: 'Blazing Star — intense drive to lead',
+      positives: ['Visionary power', 'Trailblazer'],
+      negatives: ['Isolation', 'Leadership burnout'],
+      advice: 'Rest, delegate, and share responsibility.',
     },
-    5: {
-      1: {
-        label: 'Mercury Breeze — quick but scattered',
-        positives: ['Witty', 'Charming', 'Versatile'],
-        negatives: ['Distractible', 'Impulsive'],
-        advice: 'Anchor your energy with routine.',
-      },
-      2: {
-        label: 'Dual Mercury — verbal mastery',
-        positives: ['Orator', 'Emotionally sharp'],
-        negatives: ['Gossip', 'Restlessness'],
-        advice: 'Listen deeply before you speak.',
-      },
-      3: {
-        label: 'Mercury Cyclone — persuasive power',
-        positives: ['Entrepreneur mind', 'Quick execution'],
-        negatives: ['Nervous tension', 'Burnout'],
-        advice: 'Slow down. Breathe. Choose your direction.',
-      },
-      4: {
-        label: 'Mercurial Genius — communication force',
-        positives: ['Marketing genius', 'Trend leader'],
-        negatives: ['Superficiality', 'Emotional void'],
-        advice: 'Ground your words in truth and purpose.',
-      },
+  },
+  2: {
+    1: {
+      label: 'Lunar Calm — sensitive and kind',
+      positives: ['Empathy', 'Creativity', 'Harmony'],
+      negatives: ['Emotional overload', 'Dependency'],
+      advice: 'Use art or journaling to stay emotionally grounded.',
     },
-    6: {
-      1: {
-        label: 'Venus Touch — peaceful heart',
-        positives: ['Romantic', 'Artistic', 'Home-loving'],
-        negatives: ['Over-sacrificing'],
-        advice: 'Prioritize your own needs gently.',
-      },
-      2: {
-        label: 'Double Venus — deep love pattern',
-        positives: ['Devoted', 'Spiritually inclined'],
-        negatives: ['Co-dependency', 'Jealousy'],
-        advice: 'Nurture without losing yourself.',
-      },
-      3: {
-        label: 'Triple Venus — divine mother energy',
-        positives: ['Creative', 'Emotional warmth'],
-        negatives: ['Emotional entanglement'],
-        advice: 'Establish healthy love boundaries.',
-      },
-      4: {
-        label: 'Venus Overdrive — beauty and burden',
-        positives: ['Spiritual magnet', 'Universal love'],
-        negatives: ['Overdramatizing', 'Idealistic pain'],
-        advice: 'Balance giving with receiving.',
-      },
+    2: {
+      label: 'Double Moon — deep emotional soul',
+      positives: ['Deep understanding', 'Spiritual bonds'],
+      negatives: ['Mood swings', 'Unspoken resentment'],
+      advice: 'Practice emotional boundaries. Speak your truth.',
     },
-    7: {
-      1: {
-        label: 'Ketu Light — detached thinker',
-        positives: ['Spiritual', 'Wise', 'Introspective'],
-        negatives: ['Loner tendencies', 'Isolation'],
-        advice: 'Express and connect through grounded action.',
-      },
-      2: {
-        label: 'Double Ketu — mystic and mirror',
-        positives: ['Inner peace', 'Spiritual insights'],
-        negatives: ['Mental fog', 'Avoidance'],
-        advice: 'Speak your truth even in silence.',
-      },
-      3: {
-        label: 'Triple Ketu — channel of mysticism',
-        positives: ['Healing abilities', 'Sacred detachment'],
-        negatives: ['Unseen suffering'],
-        advice: 'Ground yourself through purpose.',
-      },
-      4: {
-        label: 'Silent Sage — the ancient soul',
-        positives: ['Unmatched intuition', 'Psychic strength'],
-        negatives: ['Social disconnection'],
-        advice: 'Build soul community.',
-      },
+    3: {
+      label: 'Triple Moon — intuitive mystic',
+      positives: ['Spiritual depth', 'Emotional wisdom'],
+      negatives: ['Hypersensitivity', 'Confusion in decisions'],
+      advice: 'Seek clarity before emotional reaction.',
     },
-    8: {
-      1: {
-        label: 'Saturn’s Call — karmic builder',
-        positives: ['Disciplined', 'Responsible'],
-        negatives: ['Delayed success'],
-        advice: 'Your timing is divine — trust it.',
-      },
-      2: {
-        label: 'Double Saturn — tested strength',
-        positives: ['Endurance', 'Emotional maturity'],
-        negatives: ['Suppressed emotions'],
-        advice: 'Let your emotions flow, not block.',
-      },
-      3: {
-        label: 'Triple Saturn — karmic intensity',
-        positives: ['Mentor energy', 'Financial planner'],
-        negatives: ['Heavy energy', 'Loneliness'],
-        advice: 'Create balance with joy and lightness.',
-      },
-      4: {
-        label: 'Saturn Forge — deep karma worker',
-        positives: ['Legacy builder'],
-        negatives: ['Isolation', 'Burden bearer'],
-        advice: 'Heal your own inner wounds first.',
-      },
+    4: {
+      label: 'Mystic Waters — flow of empathy',
+      positives: ['Healer energy', 'Inner vision'],
+      negatives: ['Psychic overload', 'Escape tendency'],
+      advice: 'Protect your energy. Channel into healing work.',
     },
-    9: {
-      1: {
-        label: 'Mars Pulse — energetic leader',
-        positives: ['Determined', 'Bold', 'Resilient'],
-        negatives: ['Reactive'],
-        advice: 'Pause before action. Power lies in patience.',
-      },
-      2: {
-        label: 'Double Mars — intense drive',
-        positives: ['Fighter spirit', 'Unstoppable force'],
-        negatives: ['Confrontational'],
-        advice: 'Choose your battles wisely.',
-      },
-      3: {
-        label: 'Triple Mars — spiritual warrior',
-        positives: ['Conflict resolution', 'Purpose-led'],
-        negatives: ['Volatility', 'Emotional bursts'],
-        advice: 'Breathe deeply. Let service guide you.',
-      },
-      4: {
-        label: 'Karmic Flame — soul path of fire',
-        positives: ['Transformational leader'],
-        negatives: ['Burnout pattern', 'Martyr complex'],
-        advice: 'Protect your flame. Serve with care.',
-      },
+  },
+  3: {
+    1: {
+      label: 'Joyful Spark — creative thinker',
+      positives: ['Optimism', 'Communication', 'Humor'],
+      negatives: ['Scattered focus', 'Overtalking'],
+      advice: 'Ground your ideas. Let action follow expression.',
     },
-  };
+    2: {
+      label: 'Dual 3 — verbal mastery needing depth',
+      positives: ['Emotional IQ', 'Persuasive tone'],
+      negatives: ['Overexplaining', 'Emotional detachment'],
+      advice: 'Pause before response. Create room for others.',
+    },
+    3: {
+      label: 'Triple 3 — creative whirlwind',
+      positives: ['Entrepreneur mind', 'Sharp wit'],
+      negatives: ['Burnout risk', 'Overcommitment'],
+      advice: 'Create space to rest and reflect regularly.',
+    },
+    4: {
+      label: 'Storm of Ideas — powerful voice',
+      positives: ['Marketing genius', 'Movement starter'],
+      negatives: ['Inconsistency', 'Career instability'],
+      advice: 'Ground yourself in value, not applause.',
+    },
+  },
+  4: {
+    1: {
+      label: 'Rahu\'s Order — builder and planner',
+      positives: ['Hardworking', 'Loyal', 'Logical'],
+      negatives: ['Rigidity', 'Overwork'],
+      advice: 'Allow for flow. Adaptation is your key to success.',
+    },
+    2: {
+      label: 'Double 4 — karmic foundation',
+      positives: ['Structured life', 'Security'],
+      negatives: ['Resistance to change', 'Stubborn behavior'],
+      advice: 'Let go of control in uncertain paths.',
+    },
+    3: {
+      label: 'Triple 4 — path of tests',
+      positives: ['Master builder energy', 'Persistence'],
+      negatives: ['Delays', 'Overthinking'],
+      advice: 'Focus on progress, not perfection.',
+    },
+    4: {
+      label: 'Sacred Architect — intense discipline',
+      positives: ['Legacy maker', 'Mentor archetype'],
+      negatives: ['Loneliness', 'Emotional distance'],
+      advice: 'Invite joy and spontaneity.',
+    },
+  },
+  5: {
+    1: {
+      label: 'Mercury Breeze — quick but scattered',
+      positives: ['Witty', 'Charming', 'Versatile'],
+      negatives: ['Distractible', 'Impulsive'],
+      advice: 'Anchor your energy with routine.',
+    },
+    2: {
+      label: 'Dual Mercury — verbal mastery',
+      positives: ['Orator', 'Emotionally sharp'],
+      negatives: ['Gossip', 'Restlessness'],
+      advice: 'Listen deeply before you speak.',
+    },
+    3: {
+      label: 'Mercury Cyclone — persuasive power',
+      positives: ['Entrepreneur mind', 'Quick execution'],
+      negatives: ['Nervous tension', 'Burnout'],
+      advice: 'Slow down. Breathe. Choose your direction.',
+    },
+    4: {
+      label: 'Mercurial Genius — communication force',
+      positives: ['Marketing genius', 'Trend leader'],
+      negatives: ['Superficiality', 'Emotional void'],
+      advice: 'Ground your words in truth and purpose.',
+    },
+  },
+  6: {
+    1: {
+      label: 'Venus Touch — peaceful heart',
+      positives: ['Romantic', 'Artistic', 'Home-loving'],
+      negatives: ['Over-sacrificing'],
+      advice: 'Prioritize your own needs gently.',
+    },
+    2: {
+      label: 'Double Venus — deep love pattern',
+      positives: ['Devoted', 'Spiritually inclined'],
+      negatives: ['Co-dependency', 'Jealousy'],
+      advice: 'Nurture without losing yourself.',
+    },
+    3: {
+      label: 'Triple Venus — divine mother energy',
+      positives: ['Creative', 'Emotional warmth'],
+      negatives: ['Emotional entanglement'],
+      advice: 'Establish healthy love boundaries.',
+    },
+    4: {
+      label: 'Venus Overdrive — beauty and burden',
+      positives: ['Spiritual magnet', 'Universal love'],
+      negatives: ['Overdramatizing', 'Idealistic pain'],
+      advice: 'Balance giving with receiving.',
+    },
+  },
+  7: {
+    1: {
+      label: 'Ketu Light — detached thinker',
+      positives: ['Spiritual', 'Wise', 'Introspective'],
+      negatives: ['Loner tendencies', 'Isolation'],
+      advice: 'Express and connect through grounded action.',
+    },
+    2: {
+      label: 'Double Ketu — mystic and mirror',
+      positives: ['Inner peace', 'Spiritual insights'],
+      negatives: ['Mental fog', 'Avoidance'],
+      advice: 'Speak your truth even in silence.',
+    },
+    3: {
+      label: 'Triple Ketu — channel of mysticism',
+      positives: ['Healing abilities', 'Sacred detachment'],
+      negatives: ['Unseen suffering'],
+      advice: 'Ground yourself through purpose.',
+    },
+    4: {
+      label: 'Silent Sage — the ancient soul',
+      positives: ['Unmatched intuition', 'Psychic strength'],
+      negatives: ['Social disconnection'],
+      advice: 'Build soul community.',
+    },
+  },
+  8: {
+    1: {
+      label: 'Saturn\'s Call — karmic builder',
+      positives: ['Disciplined', 'Responsible'],
+      negatives: ['Delayed success'],
+      advice: 'Your timing is divine — trust it.',
+    },
+    2: {
+      label: 'Double Saturn — tested strength',
+      positives: ['Endurance', 'Emotional maturity'],
+      negatives: ['Suppressed emotions'],
+      advice: 'Let your emotions flow, not block.',
+    },
+    3: {
+      label: 'Triple Saturn — karmic intensity',
+      positives: ['Mentor energy', 'Financial planner'],
+      negatives: ['Heavy energy', 'Loneliness'],
+      advice: 'Create balance with joy and lightness.',
+    },
+    4: {
+      label: 'Saturn Forge — deep karma worker',
+      positives: ['Legacy builder'],
+      negatives: ['Isolation', 'Burden bearer'],
+      advice: 'Heal your own inner wounds first.',
+    },
+  },
+  9: {
+    1: {
+      label: 'Mars Pulse — energetic leader',
+      positives: ['Determined', 'Bold', 'Resilient'],
+      negatives: ['Reactive'],
+      advice: 'Pause before action. Power lies in patience.',
+    },
+    2: {
+      label: 'Double Mars — intense drive',
+      positives: ['Fighter spirit', 'Unstoppable force'],
+      negatives: ['Confrontational'],
+      advice: 'Choose your battles wisely.',
+    },
+    3: {
+      label: 'Triple Mars — spiritual warrior',
+      positives: ['Conflict resolution', 'Purpose-led'],
+      negatives: ['Volatility', 'Emotional bursts'],
+      advice: 'Breathe deeply. Let service guide you.',
+    },
+    4: {
+      label: 'Karmic Flame — soul path of fire',
+      positives: ['Transformational leader'],
+      negatives: ['Burnout pattern', 'Martyr complex'],
+      advice: 'Protect your flame. Serve with care.',
+    },
+  },
+};
 
-  const combinationInsights = [
-    {
-      condition: (freqMap) =>
-        freqMap[3] >= 1 &&
-        freqMap[1] >= 1 &&
-        !freqMap[9], // 9 is missing
-      label: 'Combination 3 & 1 (without 9)',
-      title: 'Sun-Jupiter Alignment — Knowledge Through Discipline',
-      behavioral: [
-        'Highly educated and intellectually curious',
-        'Diligent workers with long-term focus',
-        'Respected for wisdom and communication skills',
-      ],
-      professional: [
-        'Teaching',
-        'Public Speaking',
-        'Consulting',
-        'Law',
-        'Counseling',
-      ],
-      negatives: [
-        'High standards may make them rigid or judgmental',
-        'Lack of number 9 leads to imbalance in emotional depth',
-      ],
-      notes: [
-        'Pursue advanced education, but stay open to emotional growth',
-        'Combine wisdom with empathy for better life balance',
-      ]
-    },
-    {
-      condition: (freqMap) =>
-        freqMap[3] >= 1 &&
-        freqMap[1] >= 1 &&
-        freqMap[9] >= 1, // 9 is now present
-      label: 'Presence of Number 9 with 3 & 1',
-      title: 'Mars Adds Emotional Maturity to Sun-Jupiter Alignment',
-      color: 'text-green-300',
-      behavioral: [
-        'Emotional grounding balances intellectual dominance',
-        'Compassion, empathy, and patience emerge in leadership',
-        'Reduces rigid or judgmental tendencies of 1 & 3 combo'
-      ],
-      notes: [
-        'This is a powerful combination for healing leaders, teachers, and guides',
-        'Adds emotional intelligence to decision-making and public communication'
-      ]
-    },
-    
-    {
+// Combination Insights
+const combinationInsights = [
+  {
+    condition: (freqMap) => freqMap[3] >= 1 && freqMap[1] >= 1 && !freqMap[9],
+    label: 'Combination 3 & 1 (without 9)',
+    title: 'Sun-Jupiter Alignment — Knowledge Through Discipline',
+    behavioral: [
+      'Highly educated and intellectually curious',
+      'Diligent workers with long-term focus',
+      'Respected for wisdom and communication skills',
+    ],
+    professional: ['Teaching', 'Public Speaking', 'Consulting', 'Law', 'Counseling'],
+    negatives: [
+      'High standards may make them rigid or judgmental',
+      'Lack of number 9 leads to imbalance in emotional depth',
+    ],
+    notes: [
+      'Pursue advanced education, but stay open to emotional growth',
+      'Combine wisdom with empathy for better life balance',
+    ]
+  },
+  {
+    condition: (freqMap) => freqMap[3] >= 1 && freqMap[1] >= 1 && freqMap[9] >= 1,
+    label: 'Presence of Number 9 with 3 & 1',
+    title: 'Mars Adds Emotional Maturity to Sun-Jupiter Alignment',
+    behavioral: [
+      'Emotional grounding balances intellectual dominance',
+      'Compassion, empathy, and patience emerge in leadership',
+      'Reduces rigid or judgmental tendencies of 1 & 3 combo'
+    ],
+    notes: [
+      'This is a powerful combination for healing leaders, teachers, and guides',
+      'Adds emotional intelligence to decision-making and public communication'
+    ]
+  },
+
+  {
       condition: (freq) => freq[2] >= 1 && freq[6] >= 1 && !freq[3],
       label: 'Combination: 2 & 6 — 3 Missing (Moon-Venus)',
       title: 'Moon-Venus Connection Without Jupiter — Creativity Without Logic',
@@ -763,21 +773,23 @@ const predictionLibrary = {
           ]
         }
       },
-    ];
+  // ... Add all other combination insights here following the same pattern
+];
 
-    const dashaCases = [
-        {
-          when: ({ maha, freqMap }) => maha === 1 && !freqMap[1],
-          title: 'Mahadasha of 1 — Sun without 1 in Grid',
-          color: 'text-yellow-300',
-          traits: [
-            'Increased anger and assertiveness',
-            'Commanding presence, heightened ego',
-            'Strong craving for respect and validation'
-          ],
-          advice: 'Practice patience and introspection. Avoid letting pride affect relationships.'
-        },
-        {
+// Dasha Cases
+const dashaCases = [
+  {
+    when: ({ maha, freqMap }) => maha === 1 && !freqMap[1],
+    title: 'Mahadasha of 1 — Sun without 1 in Grid',
+    traits: [
+      'Increased anger and assertiveness',
+      'Commanding presence, heightened ego',
+      'Strong craving for respect and validation'
+    ],
+    advice: 'Practice patience and introspection. Avoid letting pride affect relationships.'
+  },
+
+  {
           when: ({ maha, freqMap }) =>
             maha === 1 && freqMap[1] === 1 && !freqMap[3] && !freqMap[9],
           title: 'Mahadasha of 1 — One Sun Present without Jupiter or Mars',
@@ -1221,20 +1233,23 @@ const predictionLibrary = {
             }
           ]
         },
-      ];
-      const antarCases = [
-        {
-          when: ({ antar, maha }) => antar === 1 && maha === 1,
-          title: 'Antardasha 1 in Mahadasha 1 — Double Sun Energy',
-          color: 'text-yellow-300',
-          traits: [
-            'Highly assertive, goal-oriented, and ambitious',
-            'Strong leadership but prone to ego clashes',
-            'Confidence shines, but may dominate others unintentionally'
-          ],
-          advice: 'Be mindful of arrogance. Use your drive to uplift, not overpower.'
-        },
-        {
+  // ... Add all other dasha cases here
+];
+
+// Antar Cases
+const antarCases = [
+  {
+    when: ({ antar, maha }) => antar === 1 && maha === 1,
+    title: 'Antardasha 1 in Mahadasha 1 — Double Sun Energy',
+    traits: [
+      'Highly assertive, goal-oriented, and ambitious',
+      'Strong leadership but prone to ego clashes',
+      'Confidence shines, but may dominate others unintentionally'
+    ],
+    advice: 'Be mindful of arrogance. Use your drive to uplift, not overpower.'
+  },
+
+  {
           when: ({ antar, maha }) => antar === 1 && maha === 7,
           title: 'Antardasha 1 in Mahadasha 7 — Vision Meets Intuition',
           color: 'text-cyan-300',
@@ -1765,14 +1780,19 @@ const predictionLibrary = {
             }
           ]
         }
-      ];
+  // ... Add all other antar cases here
+];
 
 export default function PredictionPage() {
   const searchParams = useSearchParams();
   const [grid, setGrid] = useState(Array(3).fill(null).map(() => Array(3).fill(null).map(() => [])));
   const [predictionBlocks, setPredictionBlocks] = useState([]);
-  const [dashaInsightsBlocks, setDashaInsightsBlocks] = useState([]);
+  const [combinationBlocks, setCombinationBlocks] = useState([]);
+  const [mahaInsights, setMahaInsights] = useState([]);
+  const [antarInsights, setAntarInsights] = useState([]);
   const [numberFrequency, setNumberFrequency] = useState({});
+  const [activeTab, setActiveTab] = useState('overview');
+  const [isLoading, setIsLoading] = useState(true);
 
   const name = searchParams.get('name') || '';
   const dob = searchParams.get('dob') || '';
@@ -1786,6 +1806,7 @@ export default function PredictionPage() {
   const antarEnd = searchParams.get('antarEnd') || '';
   const chartNumbers = searchParams.getAll('gridNumbers').map(Number);
 
+  // Grid initialization effect
   useEffect(() => {
     const freqMap = {};
     chartNumbers.forEach(num => {
@@ -1821,12 +1842,13 @@ export default function PredictionPage() {
     });
 
     setGrid(tempGrid);
+    setIsLoading(false);
   }, [chartNumbers.join(','), maha, antar]);
 
+  // Prediction blocks effect
   useEffect(() => {
     const blocks = [];
   
-    // 1. Standard prediction blocks based on number frequencies
     Object.entries(numberFrequency).forEach(([numStr, count]) => {
       const number = Number(numStr);
       const isBasic = number === basicNumber;
@@ -1837,7 +1859,6 @@ export default function PredictionPage() {
       let trueCount = count;
       const inGrid = chartNumbers.includes(number);
   
-      // Avoid double-counting if already present
       if (inGrid && isBasic) trueCount -= 1;
       if (inGrid && isDestiny && trueCount > 0) trueCount -= 1;
       if (inGrid && isMaha && trueCount > 0) trueCount -= 1;
@@ -1850,105 +1871,90 @@ export default function PredictionPage() {
       if (isAntar) categoryTags.push('Antardasha');
   
       const labelTag = categoryTags.join(', ');
-      const color =
-        number === 1 ? 'text-yellow-400' :
-        number === 2 ? 'text-green-400' :
-        number === 3 ? 'text-blue-400' :
-        number === 4 ? 'text-red-400' :
-        number === 5 ? 'text-orange-400' :
-        number === 6 ? 'text-pink-400' :
-        number === 7 ? 'text-cyan-300' :
-        number === 8 ? 'text-purple-400' :
-        'text-gray-400';
   
       const libraryBlock = predictionLibrary[number]?.[trueCount];
       if (!libraryBlock) return;
   
       blocks.push({
         label: `${labelTag ? labelTag + ' + ' : ''}${trueCount} time${trueCount > 1 ? 's' : ''} — Number ${number}`,
-        color,
-        content: `
-  ${libraryBlock.label}
-  
-  Positives: ${libraryBlock.positives.join(', ')}
-  
-  Negatives: ${libraryBlock.negatives.join(', ')}
-  
-  Advice: ${libraryBlock.advice}
-        `.trim()
+        number,
+        content: libraryBlock,
+        type: 'prediction'
       });
-    });
-  
-    // 2. Combination Insight Predictions (like 3+1 without 9 etc.)
-    combinationInsights.forEach((combo) => {
-      if (combo.condition(numberFrequency)) {
-        const color = combo.color || 'text-yellow-300';
-        blocks.push({
-          label: combo.label,
-          color,
-          content: `
-  ${combo.title || ''}
-  
-  Behavioural Traits:\n${(combo.behavioral || combo.data?.behavioral || []).join('\n')}
-  
-  Professional Strengths:\n${(combo.professional || combo.data?.professional || []).join('\n')}
-  
-  Negatives:\n${(combo.negatives || combo.data?.negatives || []).join('\n')}
-  
-  Notes:\n${(combo.notes || combo.data?.notes || []).join('\n')}
-          `.trim()
-        });
-      }
     });
   
     setPredictionBlocks(blocks);
   }, [numberFrequency]);
+
+  // Combination insights effect
   useEffect(() => {
-    const dashaMatches = [];
-  
+    const blocks = [];
+    
+    combinationInsights.forEach((combo) => {
+      if (combo.condition(numberFrequency)) {
+        blocks.push({
+          label: combo.label,
+          title: combo.title,
+          behavioral: combo.behavioral || combo.data?.behavioral || [],
+          professional: combo.professional || combo.data?.professional || [],
+          negatives: combo.negatives || combo.data?.negatives || [],
+          notes: combo.notes || combo.data?.notes || [],
+          type: 'combination'
+        });
+      }
+    });
+    
+    setCombinationBlocks(blocks);
+  }, [numberFrequency]);
+
+  // Mahadasha insights effect
+  useEffect(() => {
+    const mahaMatches = [];
+    
     dashaCases.forEach((caseObj) => {
       if (caseObj.when && typeof caseObj.when === 'function') {
         const result = caseObj.when({ maha, freqMap: numberFrequency, destinyNumber });
         if (result) {
-          dashaMatches.push({
+          mahaMatches.push({
             title: caseObj.title,
-            color: caseObj.color || 'text-yellow-300',
             traits: caseObj.traits || caseObj.behavioral || [],
             advice: caseObj.advice || '',
             predictive: caseObj.predictive || [],
+            type: 'maha'
           });
         }
       } else if (caseObj.number === maha && caseObj.scenarios) {
         caseObj.scenarios.forEach((sc) => {
           if (sc.when({ maha, freqMap: numberFrequency })) {
-            dashaMatches.push({
+            mahaMatches.push({
               title: sc.title,
-              color: caseObj.color,
               traits: sc.traits || sc.behavioral || [],
               predictive: sc.predictive || [],
               advice: sc.advice || '',
+              type: 'maha'
             });
           }
         });
       }
     });
-  
-    setDashaInsightsBlocks(dashaMatches);
+    
+    setMahaInsights(mahaMatches);
   }, [maha, numberFrequency]);
 
+  // Antardasha insights effect
   useEffect(() => {
     const antarMatches = [];
-  
+    
     antarCases.forEach((caseObj) => {
       if (caseObj.when && typeof caseObj.when === 'function') {
         const result = caseObj.when({ antar, maha, freqMap: numberFrequency });
         if (result) {
           antarMatches.push({
             title: caseObj.title,
-            color: caseObj.color || 'text-green-300',
             traits: caseObj.traits || [],
             advice: caseObj.advice || '',
             predictive: caseObj.predictive || [],
+            type: 'antar'
           });
         }
       } else if (caseObj.number === antar && caseObj.scenarios) {
@@ -1956,166 +1962,746 @@ export default function PredictionPage() {
           if (scenario.when({ antar, freqMap: numberFrequency })) {
             antarMatches.push({
               title: scenario.title,
-              color: caseObj.color,
               traits: scenario.traits || [],
               advice: scenario.advice || '',
               predictive: scenario.predictive || [],
+              type: 'antar'
             });
           }
         });
       }
     });
-  
-    setDashaInsightsBlocks((prev) => [...prev, ...antarMatches]);
+    
+    setAntarInsights(antarMatches);
   }, [antar, maha, numberFrequency]);
-  
-  
 
-  return (
-    <div className="h-screen w-screen overflow-auto bg-black text-white px-4 py-10 flex flex-col items-center">
-      <h1 className="text-4xl font-bold mb-8 text-yellow-400 drop-shadow">🌌 Your Numerology Prediction</h1>
-  
-      <div className="w-full max-w-2xl bg-[#0f172a] p-6 rounded-xl border border-purple-600 shadow-lg mb-6 text-base md:text-lg">
-        <div className="grid grid-cols-2 gap-3">
-          <p><b>👤 Name:</b> {name}</p>
-          <p><b>📅 Date of Birth:</b> {dob}</p>
-          <p><b>🔢 Basic Number:</b> {basicNumber}</p>
-          <p><b>🎯 Destiny Number:</b> {destinyNumber}</p>
+  // Helper function to get number color
+  const getNumberColor = (number) => {
+    const colorMap = {
+      1: brandColors.maha,
+      2: '#10b981',
+      3: '#3b82f6',
+      4: brandColors.warning,
+      5: brandColors.accentGold,
+      6: '#ec4899',
+      7: brandColors.accentCyan,
+      8: '#8b5cf6',
+      9: '#f59e0b'
+    };
+    return colorMap[number] || brandColors.accentGold;
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: brandColors.primaryBg }}>
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4" 
+               style={{ borderColor: `${brandColors.accentGold} transparent transparent transparent` }}></div>
+          <p className="text-xl" style={{ color: brandColors.textWhite }}>Calculating your cosmic blueprint...</p>
         </div>
       </div>
-  
-      <div className="grid grid-cols-3 gap-3 border-4 border-yellow-500 p-4 rounded-xl bg-[#111827] shadow-lg mb-4">
-        {grid.map((row, rIdx) =>
-          row.map((cell, cIdx) => (
-            <div key={`${rIdx}-${cIdx}`} className="min-w-[6rem] min-h-[6rem] border-2 border-gray-700 bg-black rounded-md flex justify-center items-center">
-              <div className="flex flex-wrap justify-center items-center gap-1 max-w-full">
-                {cell.map((item, i) => (
-                  <span
+    );
+  }
+
+  return (
+    <div className="min-h-screen w-full overflow-auto" style={{ backgroundColor: brandColors.primaryBg, color: brandColors.textWhite }}>
+      {/* Cosmic Background */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute inset-0 opacity-20" style={{
+          backgroundImage: `radial-gradient(circle at 20% 50%, ${brandColors.accentGold}20 0%, transparent 50%),
+                           radial-gradient(circle at 80% 20%, ${brandColors.accentCyan}10 0%, transparent 50%),
+                           radial-gradient(circle at 40% 80%, ${brandColors.success}15 0%, transparent 50%)`,
+        }}></div>
+        <div className="absolute inset-0 opacity-30" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23d4af37' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+        }}></div>
+      </div>
+
+      {/* Header */}
+      <div className="relative z-10 pt-12 pb-8 text-center">
+        <div className="max-w-4xl mx-auto px-4">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4" 
+              style={{ 
+                color: brandColors.textWhite,
+                textShadow: `0 0 20px ${brandColors.accentGold}80`
+              }}>
+            Your Cosmic Numerology Reading
+          </h1>
+          <p className="text-xl opacity-80 max-w-2xl mx-auto" style={{ color: brandColors.neutralGray }}>
+            Unlock the secrets of your numbers and discover your life path
+          </p>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 max-w-6xl mx-auto px-4 pb-16">
+        {/* Navigation Tabs */}
+        <div className="flex justify-center mb-12">
+          <div className="inline-flex rounded-xl p-1" style={{ backgroundColor: brandColors.secondaryBg }}>
+            {[
+              { id: 'overview', label: 'Overview', icon: '👤' },
+              { id: 'grid', label: 'Numerology Grid', icon: '🔢' },
+              { id: 'insights', label: 'Cosmic Insights', icon: '✨' },
+              { id: 'predictions', label: 'Number Meanings', icon: '📜' }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 ${
+                  activeTab === tab.id 
+                    ? 'shadow-lg' 
+                    : 'opacity-70 hover:opacity-100'
+                }`}
+                style={{
+                  backgroundColor: activeTab === tab.id ? brandColors.accentGold : 'transparent',
+                  color: activeTab === tab.id ? brandColors.primaryBg : brandColors.textWhite
+                }}
+              >
+                <span>{tab.icon}</span>
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Content Sections */}
+        <div className="space-y-12">
+          {/* Overview Section */}
+          {activeTab === 'overview' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Personal Info Card */}
+              <div className="rounded-2xl p-8 shadow-2xl backdrop-blur-sm" 
+                   style={{ 
+                     backgroundColor: `${brandColors.secondaryBg}cc`,
+                     border: `1px solid ${brandColors.accentGold}30`,
+                     backgroundImage: `linear-gradient(135deg, ${brandColors.secondaryBg} 0%, ${brandColors.primaryBg} 100%)`
+                   }}>
+                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3" 
+                    style={{ color: brandColors.accentGold }}>
+                  <span className="text-3xl">👤</span>
+                  Personal Information
+                </h2>
+                
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center py-4 border-b" 
+                       style={{ borderColor: `${brandColors.accentGold}20` }}>
+                    <span className="font-medium" style={{ color: brandColors.neutralGray }}>Name</span>
+                    <span className="font-semibold text-xl">{name}</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center py-4 border-b" 
+                       style={{ borderColor: `${brandColors.accentGold}20` }}>
+                    <span className="font-medium" style={{ color: brandColors.neutralGray }}>Date of Birth</span>
+                    <span className="font-semibold text-xl">{dob}</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center py-4 border-b" 
+                       style={{ borderColor: `${brandColors.accentGold}20` }}>
+                    <span className="font-medium" style={{ color: brandColors.neutralGray }}>Basic Number</span>
+                    <span className="font-semibold text-xl w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg"
+                          style={{ 
+                            backgroundColor: brandColors.accentGold,
+                            boxShadow: `0 0 15px ${brandColors.accentGold}80`
+                          }}>
+                      {basicNumber}
+                    </span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center py-4" 
+                       style={{ borderColor: `${brandColors.accentGold}20` }}>
+                    <span className="font-medium" style={{ color: brandColors.neutralGray }}>Destiny Number</span>
+                    <span className="font-semibold text-xl w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg"
+                          style={{ 
+                            backgroundColor: brandColors.accentCyan,
+                            boxShadow: `0 0 15px ${brandColors.accentCyan}80`
+                          }}>
+                      {destinyNumber}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Stats */}
+              <div className="rounded-2xl p-8 shadow-2xl backdrop-blur-sm" 
+                   style={{ 
+                     backgroundColor: `${brandColors.secondaryBg}cc`,
+                     border: `1px solid ${brandColors.accentGold}30`,
+                     backgroundImage: `linear-gradient(135deg, ${brandColors.secondaryBg} 0%, ${brandColors.primaryBg} 100%)`
+                   }}>
+                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3" 
+                    style={{ color: brandColors.accentGold }}>
+                  <span className="text-3xl">📊</span>
+                  Numerology Summary
+                </h2>
+                
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="text-center p-4 rounded-xl" style={{ backgroundColor: brandColors.primaryBg }}>
+                    <div className="text-3xl font-bold mb-2" style={{ color: brandColors.maha }}>{maha}</div>
+                    <div className="text-sm" style={{ color: brandColors.neutralGray }}>Mahadasha</div>
+                  </div>
+                  
+                  <div className="text-center p-4 rounded-xl" style={{ backgroundColor: brandColors.primaryBg }}>
+                    <div className="text-3xl font-bold mb-2" style={{ color: brandColors.antar }}>{antar}</div>
+                    <div className="text-sm" style={{ color: brandColors.neutralGray }}>Antardasha</div>
+                  </div>
+                  
+                  <div className="text-center p-4 rounded-xl" style={{ backgroundColor: brandColors.primaryBg }}>
+                    <div className="text-3xl font-bold mb-2" style={{ color: brandColors.accentGold }}>
+                      {Object.keys(numberFrequency).length}
+                    </div>
+                    <div className="text-sm" style={{ color: brandColors.neutralGray }}>Active Numbers</div>
+                  </div>
+                  
+                  <div className="text-center p-4 rounded-xl" style={{ backgroundColor: brandColors.primaryBg }}>
+                    <div className="text-3xl font-bold mb-2" style={{ color: brandColors.accentCyan }}>
+                      {combinationBlocks.length}
+                    </div>
+                    <div className="text-sm" style={{ color: brandColors.neutralGray }}>Powerful Combinations</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Numerology Grid Section */}
+          {activeTab === 'grid' && (
+            <div className="text-center">
+              <h2 className="text-3xl font-bold mb-8" style={{ color: brandColors.accentGold }}>
+                Your Numerology Grid
+              </h2>
+              
+              <div className="flex justify-center mb-12">
+                <div className="grid grid-cols-3 gap-6 p-8 rounded-3xl max-w-md mx-auto shadow-2xl backdrop-blur-sm" 
+                     style={{ 
+                       backgroundColor: `${brandColors.secondaryBg}cc`,
+                       border: `2px solid ${brandColors.accentGold}`,
+                       boxShadow: `0 0 40px ${brandColors.accentGold}30`,
+                       backgroundImage: `radial-gradient(circle at center, ${brandColors.secondaryBg} 0%, ${brandColors.primaryBg} 100%)`
+                     }}>
+                  {grid.map((row, rIdx) =>
+                    row.map((cell, cIdx) => (
+                      <div key={`${rIdx}-${cIdx}`} 
+                           className="w-24 h-24 rounded-2xl flex justify-center items-center transition-all duration-300 hover:scale-110 hover:rotate-3"
+                           style={{ 
+                             backgroundColor: brandColors.primaryBg,
+                             border: `2px solid ${brandColors.accentGold}40`,
+                             boxShadow: `inset 0 4px 12px ${brandColors.primaryBg}80, 0 4px 12px ${brandColors.primaryBg}80`
+                           }}>
+                        <div className="flex flex-wrap justify-center items-center gap-1">
+                          {cell.map((item, i) => (
+                            <span
+                              key={i}
+                              className={`rounded-xl text-sm font-bold px-2 py-1 transition-all duration-200 ${
+                                item.highlight === 'maha' 
+                                  ? 'animate-pulse' 
+                                  : item.highlight === 'antar' 
+                                    ? 'shadow-lg' 
+                                    : ''
+                              }`}
+                              style={{
+                                backgroundColor: item.highlight === 'maha' 
+                                  ? brandColors.maha 
+                                  : item.highlight === 'antar' 
+                                    ? brandColors.antar 
+                                    : brandColors.regular,
+                                color: item.highlight ? brandColors.primaryBg : brandColors.textWhite,
+                                boxShadow: item.highlight ? `0 0 15px ${item.highlight === 'maha' ? brandColors.maha : brandColors.antar}80` : 'none'
+                              }}
+                            >
+                              {item.value}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+              
+              {/* Grid Legend */}
+              <div className="flex justify-center gap-8 mt-8 text-sm flex-wrap">
+                <div className="flex items-center gap-3 p-4 rounded-xl backdrop-blur-sm" 
+                     style={{ backgroundColor: `${brandColors.secondaryBg}cc` }}>
+                  <div className="w-5 h-5 rounded-lg shadow-lg" style={{ backgroundColor: brandColors.maha }}></div>
+                  <span className="font-semibold">Mahadasha</span>
+                </div>
+                <div className="flex items-center gap-3 p-4 rounded-xl backdrop-blur-sm" 
+                     style={{ backgroundColor: `${brandColors.secondaryBg}cc` }}>
+                  <div className="w-5 h-5 rounded-lg shadow-lg" style={{ backgroundColor: brandColors.antar }}></div>
+                  <span className="font-semibold">Antardasha</span>
+                </div>
+                <div className="flex items-center gap-3 p-4 rounded-xl backdrop-blur-sm" 
+                     style={{ backgroundColor: `${brandColors.secondaryBg}cc` }}>
+                  <div className="w-5 h-5 rounded-lg shadow-lg" style={{ backgroundColor: brandColors.regular }}></div>
+                  <span className="font-semibold">Regular Numbers</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Dasha Timeline Section */}
+          {activeTab === 'dasha' && (
+            <div>
+              <h2 className="text-3xl font-bold mb-12 text-center" style={{ color: brandColors.accentGold }}>
+                Your Current Dasha Periods
+              </h2>
+              
+              <div className="max-w-4xl mx-auto space-y-8">
+                {/* Mahadasha Card */}
+                {(mahaStart && mahaEnd) && (
+                  <div className="rounded-2xl p-8 shadow-2xl backdrop-blur-sm flex items-center gap-6 transition-all duration-300 hover:scale-105" 
+                       style={{ 
+                         backgroundColor: `${brandColors.secondaryBg}cc`,
+                         border: `1px solid ${brandColors.maha}30`,
+                         borderLeft: `6px solid ${brandColors.maha}`,
+                         backgroundImage: `linear-gradient(135deg, ${brandColors.secondaryBg} 0%, ${brandColors.primaryBg} 100%)`
+                       }}>
+                    <div className="text-4xl">☀️</div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-2xl mb-2" style={{ color: brandColors.maha }}>
+                        Mahadasha {maha}
+                      </h3>
+                      <p className="text-lg mb-2" style={{ color: brandColors.neutralGray }}>
+                        {mahaStart} to {mahaEnd}
+                      </p>
+                      <p className="text-sm opacity-80">
+                        {getDuration(mahaStart, mahaEnd)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-5xl font-bold opacity-20" style={{ color: brandColors.maha }}>
+                        {maha}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Antardasha Card */}
+                {(antarStart && antarEnd) && (
+                  <div className="rounded-2xl p-8 shadow-2xl backdrop-blur-sm flex items-center gap-6 transition-all duration-300 hover:scale-105" 
+                       style={{ 
+                         backgroundColor: `${brandColors.secondaryBg}cc`,
+                         border: `1px solid ${brandColors.antar}30`,
+                         borderLeft: `6px solid ${brandColors.antar}`,
+                         backgroundImage: `linear-gradient(135deg, ${brandColors.secondaryBg} 0%, ${brandColors.primaryBg} 100%)`
+                       }}>
+                    <div className="text-4xl">🌙</div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-2xl mb-2" style={{ color: brandColors.antar }}>
+                        Antardasha {antar}
+                      </h3>
+                      <p className="text-lg mb-2" style={{ color: brandColors.neutralGray }}>
+                        {antarStart} to {antarEnd}
+                      </p>
+                      <p className="text-sm opacity-80">
+                        {getDuration(antarStart, antarEnd)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-5xl font-bold opacity-20" style={{ color: brandColors.antar }}>
+                        {antar}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Cosmic Insights Section */}
+          {activeTab === 'insights' && (
+            <div className="space-y-16">
+              {/* Mahadasha Insights */}
+              {mahaInsights.length > 0 && (
+                <div>
+                  <h2 className="text-3xl font-bold text-center mb-12" style={{ color: brandColors.maha }}>
+                    ☀️ Mahadasha Insights
+                  </h2>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {mahaInsights.map((insight, i) => (
+                      <div
+                        key={i}
+                        className="rounded-2xl p-8 shadow-2xl backdrop-blur-sm transition-all duration-300 hover:shadow-3xl"
+                        style={{ 
+                          backgroundColor: `${brandColors.secondaryBg}cc`,
+                          border: `1px solid ${brandColors.maha}30`,
+                          borderTop: `4px solid ${brandColors.maha}`,
+                          backgroundImage: `linear-gradient(145deg, ${brandColors.secondaryBg} 0%, ${brandColors.primaryBg} 100%)`
+                        }}
+                      >
+                        <div className="flex items-center gap-4 mb-6">
+                          <div className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg"
+                               style={{ 
+                                 backgroundColor: brandColors.maha,
+                                 boxShadow: `0 0 20px ${brandColors.maha}80`
+                               }}>
+                            {maha}
+                          </div>
+                          <h3 className="text-xl font-bold" style={{ color: brandColors.maha }}>
+                            {insight.title}
+                          </h3>
+                        </div>
+                        
+                        <div className="space-y-6">
+                          {insight.traits.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg" 
+                                  style={{ color: brandColors.accentGold }}>
+                                <span>🌟</span> Behavioral Patterns
+                              </h4>
+                              <ul className="space-y-2">
+                                {insight.traits.map((trait, idx) => (
+                                  <li key={idx} className="flex items-start gap-3">
+                                    <span className="mt-1" style={{ color: brandColors.accentGold }}>•</span>
+                                    <span>{trait}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          
+                          {insight.predictive.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg" 
+                                  style={{ color: brandColors.accentCyan }}>
+                                <span>🔮</span> Predictive Insights
+                              </h4>
+                              <ul className="space-y-2">
+                                {insight.predictive.map((prediction, idx) => (
+                                  <li key={idx} className="flex items-start gap-3">
+                                    <span className="mt-1" style={{ color: brandColors.accentCyan }}>•</span>
+                                    <span>{prediction}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          
+                          {insight.advice && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg" 
+                                  style={{ color: brandColors.success }}>
+                                <span>💡</span> Guidance & Advice
+                              </h4>
+                              <p className="italic pl-5 border-l-4" style={{ 
+                                borderColor: brandColors.success,
+                                color: brandColors.success 
+                              }}>
+                                {insight.advice}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Antardasha Insights */}
+              {antarInsights.length > 0 && (
+                <div>
+                  <h2 className="text-3xl font-bold text-center mb-12" style={{ color: brandColors.antar }}>
+                    🌙 Antardasha Insights
+                  </h2>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {antarInsights.map((insight, i) => (
+                      <div
+                        key={i}
+                        className="rounded-2xl p-8 shadow-2xl backdrop-blur-sm transition-all duration-300 hover:shadow-3xl"
+                        style={{ 
+                          backgroundColor: `${brandColors.secondaryBg}cc`,
+                          border: `1px solid ${brandColors.antar}30`,
+                          borderTop: `4px solid ${brandColors.antar}`,
+                          backgroundImage: `linear-gradient(145deg, ${brandColors.secondaryBg} 0%, ${brandColors.primaryBg} 100%)`
+                        }}
+                      >
+                        <div className="flex items-center gap-4 mb-6">
+                          <div className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg"
+                               style={{ 
+                                 backgroundColor: brandColors.antar,
+                                 boxShadow: `0 0 20px ${brandColors.antar}80`
+                               }}>
+                            {antar}
+                          </div>
+                          <h3 className="text-xl font-bold" style={{ color: brandColors.antar }}>
+                            {insight.title}
+                          </h3>
+                        </div>
+                        
+                        <div className="space-y-6">
+                          {insight.traits.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg" 
+                                  style={{ color: brandColors.accentGold }}>
+                                <span>🌀</span> Current Energy Patterns
+                              </h4>
+                              <ul className="space-y-2">
+                                {insight.traits.map((trait, idx) => (
+                                  <li key={idx} className="flex items-start gap-3">
+                                    <span className="mt-1" style={{ color: brandColors.accentGold }}>•</span>
+                                    <span>{trait}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          
+                          {insight.predictive.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg" 
+                                  style={{ color: brandColors.accentCyan }}>
+                                <span>📈</span> What to Expect
+                              </h4>
+                              <ul className="space-y-2">
+                                {insight.predictive.map((prediction, idx) => (
+                                  <li key={idx} className="flex items-start gap-3">
+                                    <span className="mt-1" style={{ color: brandColors.accentCyan }}>•</span>
+                                    <span>{prediction}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          
+                          {insight.advice && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg" 
+                                  style={{ color: brandColors.success }}>
+                                <span>🎯</span> Recommended Approach
+                              </h4>
+                              <p className="italic pl-5 border-l-4" style={{ 
+                                borderColor: brandColors.success,
+                                color: brandColors.success 
+                              }}>
+                                {insight.advice}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Combination Insights */}
+              {combinationBlocks.length > 0 && (
+                <div>
+                  <h2 className="text-3xl font-bold text-center mb-12" style={{ color: brandColors.accentGold }}>
+                    ⚡ Powerful Number Combinations
+                  </h2>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+                    {combinationBlocks.map((block, i) => (
+                      <div
+                        key={i}
+                        className="rounded-2xl p-8 shadow-2xl backdrop-blur-sm transition-all duration-300 hover:shadow-3xl hover:scale-105"
+                        style={{ 
+                          backgroundColor: `${brandColors.secondaryBg}cc`,
+                          border: `1px solid ${brandColors.accentGold}30`,
+                          backgroundImage: `linear-gradient(145deg, ${brandColors.secondaryBg} 0%, ${brandColors.primaryBg} 100%)`
+                        }}
+                      >
+                        <div className="flex items-center gap-4 mb-6">
+                          <div className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg"
+                               style={{ 
+                                 background: `linear-gradient(135deg, ${brandColors.accentGold} 0%, ${brandColors.highlightGold} 100%)`,
+                                 boxShadow: `0 0 20px ${brandColors.accentGold}80`
+                               }}>
+                            ⚡
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-bold" style={{ color: brandColors.accentGold }}>
+                              {block.title}
+                            </h3>
+                            <p className="text-sm opacity-70">{block.label}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-6">
+                          {block.behavioral.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center gap-2" 
+                                  style={{ color: brandColors.accentGold }}>
+                                <span>🌟</span> Behavioral Traits
+                              </h4>
+                              <ul className="space-y-2">
+                                {block.behavioral.map((trait, idx) => (
+                                  <li key={idx} className="flex items-start gap-3">
+                                    <span className="mt-1" style={{ color: brandColors.accentGold }}>•</span>
+                                    <span className="text-sm">{trait}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          
+                          {block.professional.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center gap-2" 
+                                  style={{ color: brandColors.success }}>
+                                <span>💼</span> Professional Strengths
+                              </h4>
+                              <ul className="space-y-2">
+                                {block.professional.map((prof, idx) => (
+                                  <li key={idx} className="flex items-start gap-3">
+                                    <span className="mt-1" style={{ color: brandColors.success }}>•</span>
+                                    <span className="text-sm">{prof}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          
+                          {block.negatives.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center gap-2" 
+                                  style={{ color: brandColors.warning }}>
+                                <span>⚠️</span> Challenges & Negatives
+                              </h4>
+                              <ul className="space-y-2">
+                                {block.negatives.map((negative, idx) => (
+                                  <li key={idx} className="flex items-start gap-3">
+                                    <span className="mt-1" style={{ color: brandColors.warning }}>•</span>
+                                    <span className="text-sm">{negative}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          
+                          {block.notes.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center gap-2" 
+                                  style={{ color: brandColors.accentCyan }}>
+                                <span>📝</span> Important Notes
+                              </h4>
+                              <ul className="space-y-2">
+                                {block.notes.map((note, idx) => (
+                                  <li key={idx} className="flex items-start gap-3">
+                                    <span className="mt-1" style={{ color: brandColors.accentCyan }}>•</span>
+                                    <span className="text-sm">{note}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Individual Number Predictions */}
+          {activeTab === 'predictions' && predictionBlocks.length > 0 && (
+            <div>
+              <h2 className="text-3xl font-bold text-center mb-12" style={{ color: brandColors.accentGold }}>
+                📜 Individual Number Predictions
+              </h2>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {predictionBlocks.map((block, i) => (
+                  <div
                     key={i}
-                    className={`rounded-md text-sm md:text-base px-2 py-[0.15rem] leading-tight
-                      ${item.highlight === 'maha' ? 'bg-yellow-400 text-black' : ''}
-                      ${item.highlight === 'antar' ? 'bg-green-400 text-black' : ''}
-                      ${!item.highlight ? 'bg-purple-600 text-white' : ''}`}
+                    className="rounded-2xl p-8 shadow-2xl backdrop-blur-sm transition-all duration-300 hover:shadow-3xl hover:scale-105"
+                    style={{ 
+                      backgroundColor: `${brandColors.secondaryBg}cc`,
+                      border: `1px solid ${getNumberColor(block.number)}30`,
+                      borderTop: `4px solid ${getNumberColor(block.number)}`,
+                      backgroundImage: `linear-gradient(145deg, ${brandColors.secondaryBg} 0%, ${brandColors.primaryBg} 100%)`
+                    }}
                   >
-                    {item.value}
-                  </span>
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg"
+                           style={{ 
+                             backgroundColor: getNumberColor(block.number),
+                             boxShadow: `0 0 20px ${getNumberColor(block.number)}80`
+                           }}>
+                        {block.number}
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold" style={{ color: getNumberColor(block.number) }}>
+                          {block.label}
+                        </h3>
+                        <p className="text-sm opacity-70">{block.content.label}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-6">
+                      {block.content.positives.length > 0 && (
+                        <div>
+                          <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg" 
+                              style={{ color: brandColors.success }}>
+                            <span>✨</span> Positive Traits
+                          </h4>
+                          <ul className="space-y-2">
+                            {block.content.positives.map((positive, idx) => (
+                              <li key={idx} className="flex items-start gap-3">
+                                <span className="mt-1" style={{ color: brandColors.success }}>•</span>
+                                <span>{positive}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      
+                      {block.content.negatives.length > 0 && (
+                        <div>
+                          <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg" 
+                              style={{ color: brandColors.warning }}>
+                            <span>⚠️</span> Challenges
+                          </h4>
+                          <ul className="space-y-2">
+                            {block.content.negatives.map((negative, idx) => (
+                              <li key={idx} className="flex items-start gap-3">
+                                <span className="mt-1" style={{ color: brandColors.warning }}>•</span>
+                                <span>{negative}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      
+                      {block.content.advice && (
+                        <div>
+                          <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg" 
+                              style={{ color: brandColors.accentCyan }}>
+                            <span>💡</span> Guidance
+                          </h4>
+                          <p className="italic pl-5 border-l-4" style={{ 
+                            borderColor: brandColors.accentCyan,
+                            color: brandColors.accentCyan 
+                          }}>
+                            {block.content.advice}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
-          ))
-        )}
+          )}
+        </div>
       </div>
-  
-      <div className="flex flex-col gap-2 items-start w-full max-w-2xl px-2 mb-10">
-        {(mahaStart && mahaEnd) && (
-          <div className="bg-yellow-900/10 text-yellow-300 border-l-4 border-yellow-500 px-4 py-2 rounded text-sm md:text-base">
-            <b>Mahadasha ({maha}):</b> {mahaStart} to {mahaEnd} ({getDuration(mahaStart, mahaEnd)})
-          </div>
-        )}
-        {(antarStart && antarEnd) && (
-          <div className="bg-green-900/10 text-green-300 border-l-4 border-green-500 px-4 py-2 rounded text-sm md:text-base">
-            <b>Antardasha ({antar}):</b> {antarStart} to {antarEnd} ({getDuration(antarStart, antarEnd)})
-          </div>
-        )}
-      </div>
-  
-      {/* ✅ MAHADASHA PREDICTIONS */}
-      {dashaInsightsBlocks.length > 0 && (
-        <div className="w-full max-w-5xl space-y-6 px-4 mb-10">
-          <h2 className="text-2xl font-bold text-yellow-300 mb-2">☀️ Dasha Insights </h2>
-          {dashaInsightsBlocks
-            .filter((block) => block.color !== 'text-green-300') // all non-Antar blocks
-            .map((block, i) => (
-              <div
-                key={i}
-                className={`border-l-8 rounded-xl shadow-lg p-6 bg-gray-900 ${block.color} border-purple-500`}
-              >
-                <h3 className="text-lg font-bold mb-2">{block.title}</h3>
-  
-                {block.traits?.length > 0 && (
-                  <div className="mb-2">
-                    <b>Traits / Behavioral Insights:</b>
-                    <ul className="list-disc pl-5 mt-1">
-                      {block.traits.map((t, j) => <li key={j}>{t}</li>)}
-                    </ul>
-                  </div>
-                )}
-  
-                {block.predictive?.length > 0 && (
-                  <div className="mb-2">
-                    <b>Predictive Insights:</b>
-                    <ul className="list-disc pl-5 mt-1">
-                      {block.predictive.map((p, j) => <li key={j}>{p}</li>)}
-                    </ul>
-                  </div>
-                )}
-  
-                {block.advice && (
-                  <div className="mt-2">
-                    <b>Advice:</b> <span className="italic">{block.advice}</span>
-                  </div>
-                )}
-              </div>
-            ))}
-        </div>
-      )}
-  
-      {/* ✅ ANTARDASHA PREDICTIONS */}
-      {dashaInsightsBlocks.filter((block) => block.color === 'text-green-300').length > 0 && (
-        <div className="w-full max-w-5xl space-y-6 px-4 mb-10">
-          <h2 className="text-2xl font-bold text-green-300 mb-2">🌙 Antardasha Insights</h2>
-          {dashaInsightsBlocks
-            .filter((block) => block.color === 'text-green-300')
-            .map((block, i) => (
-              <div
-                key={i}
-                className={`border-l-8 rounded-xl shadow-lg p-6 bg-gray-900 ${block.color} border-green-500`}
-              >
-                <h3 className="text-lg font-bold mb-2">{block.title}</h3>
-  
-                {block.traits?.length > 0 && (
-                  <div className="mb-2">
-                    <b>Traits / Behavioral Insights:</b>
-                    <ul className="list-disc pl-5 mt-1">
-                      {block.traits.map((t, j) => <li key={j}>{t}</li>)}
-                    </ul>
-                  </div>
-                )}
-  
-                {block.predictive?.length > 0 && (
-                  <div className="mb-2">
-                    <b>Predictive Insights:</b>
-                    <ul className="list-disc pl-5 mt-1">
-                      {block.predictive.map((p, j) => <li key={j}>{p}</li>)}
-                    </ul>
-                  </div>
-                )}
-  
-                {block.advice && (
-                  <div className="mt-2">
-                    <b>Advice:</b> <span className="italic">{block.advice}</span>
-                  </div>
-                )}
-              </div>
-            ))}
-        </div>
-      )}
-  
-      {/* ✅ STANDARD PREDICTION BLOCKS */}
-      {predictionBlocks.length > 0 && (
-        <div className="w-full max-w-5xl space-y-6 px-4">
-          {predictionBlocks.map((block, i) => (
-            <div
-              key={i}
-              className={`border-l-8 rounded-xl shadow-lg p-6 bg-gray-900 ${block.color} border-purple-500`}
-            >
-              <h3 className="text-lg font-bold mb-2">{block.label}</h3>
-              <pre className="text-white text-sm md:text-base whitespace-pre-wrap">{block.content}</pre>
-            </div>
-          ))}
-        </div>
-      )}
+
+      {/* Footer */}
+      <footer className="py-8 text-center mt-16 border-t relative z-10" 
+              style={{ 
+                borderColor: `${brandColors.accentGold}20`,
+                backgroundColor: `${brandColors.secondaryBg}cc`
+              }}>
+        <p className="opacity-70" style={{ color: brandColors.neutralGray }}>
+          Your personalized numerology reading • Created with cosmic energy ✨
+        </p>
+      </footer>
     </div>
   );
-}  
-
+}
