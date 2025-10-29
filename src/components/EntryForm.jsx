@@ -85,18 +85,20 @@ export default function EntryForm() {
     Date of Birth
   </label>
 
-  {/* Date input */}
   <input
     type="date"
     value={dob}
     onChange={(e) => setDob(e.target.value)}
-    className="w-full px-4 py-2 bg-[#0b0f1a]/80 text-[var(--text-primary)] border border-[var(--line)] rounded-md focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] outline-none transition-all duration-200 placeholder:text-gray-500"
-    placeholder="dd-mm-yyyy"
+    className="w-full px-4 py-2 bg-[#0b0f1a]/80 text-[var(--text-primary)] border border-[var(--line)] rounded-md focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] outline-none transition-all duration-200 relative z-10"
     required
   />
 
-  {/* Fake placeholder for mobile only */}
-  <span className="absolute left-4 top-[2.9rem] text-gray-500 text-sm pointer-events-none sm:hidden">
+  {/* Mobile-only fake placeholder */}
+  <span
+    className={`absolute left-4 top-[52px] text-gray-500 pointer-events-none transition-opacity duration-200 sm:hidden ${
+      dob ? "opacity-0" : "opacity-100"
+    }`}
+  >
     dd/mm/yyyy
   </span>
 </div>

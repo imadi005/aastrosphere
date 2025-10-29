@@ -548,8 +548,8 @@ export default function ResultsPage() {
                             >
                               <td className="p-4">
                                 {isCurrent ? (
-                                  <span className="bg-[#d4af37] text-[#0b0f19] px-3 py-2 rounded text-xs sm:text-sm font-bold shadow-sm">
-                                    Current: {row.dasha}
+                                  <span className="inline-flex items-center gap-1 bg-[#d4af37] text-[#0b0f19] px-3 py-1.5 rounded text-xs sm:text-sm font-bold shadow-sm whitespace-nowrap">
+                                    <span>Current:</span> {row.dasha}
                                   </span>
                                 ) : (
                                   <span className="font-bold text-white">{row.dasha}</span>
@@ -617,9 +617,10 @@ export default function ResultsPage() {
                               <td className="p-4 font-bold">{row.year}</td>
                               <td className="p-4">
                                 {isCurrent ? (
-                                  <span className="bg-green-500 text-white px-3 py-2 rounded text-xs sm:text-sm font-bold shadow-sm">
-                                    Current: {row.antardasha}
+                                  <span className="inline-flex items-center gap-1 bg-green-500 text-white px-3 py-1.5 rounded text-xs sm:text-sm font-bold shadow-sm whitespace-nowrap">
+                                    <span>Current:</span> {row.antardasha}
                                   </span>
+
                                 ) : (
                                   <span className="font-bold">{row.antardasha}</span>
                                 )}
