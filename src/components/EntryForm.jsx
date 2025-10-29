@@ -79,7 +79,7 @@ export default function EntryForm() {
         />
       </div>
 
-      {/* DOB */}
+{/* DOB */}
 <div className="mb-5 relative">
   <label className="block text-sm font-medium mb-2 text-[var(--accent-gold-light)]">
     Date of Birth
@@ -89,19 +89,20 @@ export default function EntryForm() {
     type="date"
     value={dob}
     onChange={(e) => setDob(e.target.value)}
-    className="w-full px-4 py-2 bg-[#0b0f1a]/80 text-[var(--text-primary)] border border-[var(--line)] rounded-md focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] outline-none transition-all duration-200 relative z-10"
+    className="w-full px-4 py-3 bg-[#0b0f1a]/80 text-[var(--text-primary)] border border-[var(--line)] rounded-md focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] outline-none transition-all duration-200 relative z-10"
     required
   />
 
-  {/* Mobile-only fake placeholder */}
+  {/* Mobile-only fake placeholder, vertically centered */}
   <span
-    className={`absolute left-4 top-[52px] text-gray-500 pointer-events-none transition-opacity duration-200 sm:hidden ${
-      dob ? "opacity-0" : "opacity-100"
+    className={`absolute left-4 inset-y-0 flex items-center pointer-events-none transition-opacity duration-200 sm:hidden text-gray-400 ${
+      dob ? 'opacity-0' : 'opacity-100'
     }`}
   >
-    dd/mm/yyyy
+    <span className="text-sm leading-none">dd/mm/yyyy</span>
   </span>
 </div>
+
 
 
 
