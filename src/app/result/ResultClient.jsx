@@ -56,7 +56,7 @@ export default function ResultsPage() {
     return s;
   };
 
-  const navigateToTool = (path, additionalParams = {}) => {
+ const navigateToTool = (path, additionalParams = {}) => {
   const query = new URLSearchParams();
   query.set('name', name);
   query.set('dob', dob);
@@ -66,14 +66,20 @@ export default function ResultsPage() {
   if (currentDasha) query.set('maha', currentDasha);
   if (currentAntardasha) query.set('antar', currentAntardasha);
   
-  // ADD THESE LINES - Pass dasha period dates
+  // Dasha period dates
   if (currentDashaPeriod.start) query.set('mahaStart', currentDashaPeriod.start);
   if (currentDashaPeriod.end) query.set('mahaEnd', currentDashaPeriod.end);
   if (currentAntardashaPeriod.start) query.set('antarStart', currentAntardashaPeriod.start);
   if (currentAntardashaPeriod.end) query.set('antarEnd', currentAntardashaPeriod.end);
   
+  // ✅ YEH IMPORTANT HAI: Grid numbers ko pass karo
   const chartDigits = gridData.flat().flatMap((cell) => cell.map((item) => item.value));
-  chartDigits.forEach((num) => query.append('gridNumbers', num));
+  console.log('Passing grid numbers:', chartDigits); // Debugging ke liye
+  
+  // Har number ko individually pass karo
+  chartDigits.forEach((num) => {
+    query.append('gridNumbers', num);
+  });
   
   Object.entries(additionalParams).forEach(([key, value]) => {
     query.set(key, value);
