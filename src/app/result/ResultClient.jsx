@@ -57,24 +57,30 @@ export default function ResultsPage() {
   };
 
   const navigateToTool = (path, additionalParams = {}) => {
-    const query = new URLSearchParams();
-    query.set('name', name);
-    query.set('dob', dob);
-    
-    if (basicNumber) query.set('basicNumber', basicNumber);
-    if (destinyNumber) query.set('destinyNumber', destinyNumber);
-    if (currentDasha) query.set('maha', currentDasha);
-    if (currentAntardasha) query.set('antar', currentAntardasha);
-    
-    const chartDigits = gridData.flat().flatMap((cell) => cell.map((item) => item.value));
-    chartDigits.forEach((num) => query.append('gridNumbers', num));
-    
-    Object.entries(additionalParams).forEach(([key, value]) => {
-      query.set(key, value);
-    });
-    
-    window.location.href = `${path}?${query.toString()}`;
-  };
+  const query = new URLSearchParams();
+  query.set('name', name);
+  query.set('dob', dob);
+  
+  if (basicNumber) query.set('basicNumber', basicNumber);
+  if (destinyNumber) query.set('destinyNumber', destinyNumber);
+  if (currentDasha) query.set('maha', currentDasha);
+  if (currentAntardasha) query.set('antar', currentAntardasha);
+  
+  // ADD THESE LINES - Pass dasha period dates
+  if (currentDashaPeriod.start) query.set('mahaStart', currentDashaPeriod.start);
+  if (currentDashaPeriod.end) query.set('mahaEnd', currentDashaPeriod.end);
+  if (currentAntardashaPeriod.start) query.set('antarStart', currentAntardashaPeriod.start);
+  if (currentAntardashaPeriod.end) query.set('antarEnd', currentAntardashaPeriod.end);
+  
+  const chartDigits = gridData.flat().flatMap((cell) => cell.map((item) => item.value));
+  chartDigits.forEach((num) => query.append('gridNumbers', num));
+  
+  Object.entries(additionalParams).forEach(([key, value]) => {
+    query.set(key, value);
+  });
+  
+  window.location.href = `${path}?${query.toString()}`;
+};
 
   useEffect(() => {
     if (!dob) return;

@@ -16,7 +16,7 @@ const brandColors = {
   accentCyan: '#00ffff',       // Celestial Cyan
   maha: '#d4af37',             // Gold for Mahadasha
   antar: '#2ecc71',            // Green for Antardasha
-  regular: '#3b82f6',          // Blue for Regular numbers
+  regular: 'linear-gradient(135deg, #1a1f38 0%, #2d3746 100%)', // Grey-black gradient for regular
 };
 
 // Helper function for date duration
@@ -1791,7 +1791,6 @@ export default function PredictionPage() {
   const [mahaInsights, setMahaInsights] = useState([]);
   const [antarInsights, setAntarInsights] = useState([]);
   const [numberFrequency, setNumberFrequency] = useState({});
-  const [activeTab, setActiveTab] = useState('overview');
   const [isLoading, setIsLoading] = useState(true);
 
   const name = searchParams.get('name') || '';
@@ -2019,632 +2018,506 @@ export default function PredictionPage() {
       </div>
 
       {/* Header */}
-      <div className="relative z-10 pt-12 pb-8 text-center">
-        <div className="max-w-4xl mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4" 
-              style={{ 
-                color: brandColors.textWhite,
-                textShadow: `0 0 20px ${brandColors.accentGold}80`
-              }}>
-            Your Cosmic Numerology Reading
-          </h1>
-          <p className="text-xl opacity-80 max-w-2xl mx-auto" style={{ color: brandColors.neutralGray }}>
-            Unlock the secrets of your numbers and discover your life path
-          </p>
-        </div>
+      <div className="relative z-10 pt-8 pb-6 text-center px-4">
+        <h1 className="text-3xl md:text-4xl font-bold mb-3" 
+            style={{ 
+              color: brandColors.textWhite,
+              textShadow: `0 0 20px ${brandColors.accentGold}80`
+            }}>
+          Your Cosmic Numerology Reading
+        </h1>
+        <p className="text-lg md:text-xl opacity-80 max-w-2xl mx-auto" style={{ color: brandColors.neutralGray }}>
+          Unlock the secrets of your numbers and discover your life path
+        </p>
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 max-w-6xl mx-auto px-4 pb-16">
-        {/* Navigation Tabs */}
-        <div className="flex justify-center mb-12">
-          <div className="inline-flex rounded-xl p-1" style={{ backgroundColor: brandColors.secondaryBg }}>
-            {[
-              { id: 'overview', label: 'Overview', icon: '👤' },
-              { id: 'grid', label: 'Numerology Grid', icon: '🔢' },
-              { id: 'insights', label: 'Cosmic Insights', icon: '✨' },
-              { id: 'predictions', label: 'Number Meanings', icon: '📜' }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 ${
-                  activeTab === tab.id 
-                    ? 'shadow-lg' 
-                    : 'opacity-70 hover:opacity-100'
-                }`}
-                style={{
-                  backgroundColor: activeTab === tab.id ? brandColors.accentGold : 'transparent',
-                  color: activeTab === tab.id ? brandColors.primaryBg : brandColors.textWhite
-                }}
-              >
-                <span>{tab.icon}</span>
-                <span>{tab.label}</span>
-              </button>
-            ))}
+      <div className="relative z-10 max-w-6xl mx-auto px-4 pb-12">
+        {/* Personal Information Section */}
+        <section className="mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Personal Info Card */}
+            <div className="rounded-2xl p-6 shadow-2xl backdrop-blur-sm" 
+                 style={{ 
+                   backgroundColor: `${brandColors.secondaryBg}cc`,
+                   border: `1px solid ${brandColors.accentGold}30`,
+                 }}>
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2" 
+                  style={{ color: brandColors.accentGold }}>
+                <span className="text-2xl">👤</span>
+                Personal Information
+              </h2>
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-3 border-b" 
+                     style={{ borderColor: `${brandColors.accentGold}20` }}>
+                  <span className="font-medium" style={{ color: brandColors.neutralGray }}>Name</span>
+                  <span className="font-semibold">{name}</span>
+                </div>
+                
+                <div className="flex justify-between items-center py-3 border-b" 
+                     style={{ borderColor: `${brandColors.accentGold}20` }}>
+                  <span className="font-medium" style={{ color: brandColors.neutralGray }}>Date of Birth</span>
+                  <span className="font-semibold">{dob}</span>
+                </div>
+                
+                <div className="flex justify-between items-center py-3 border-b" 
+                     style={{ borderColor: `${brandColors.accentGold}20` }}>
+                  <span className="font-medium" style={{ color: brandColors.neutralGray }}>Basic Number</span>
+                  <span className="font-semibold w-10 h-10 rounded-full flex items-center justify-center text-white shadow-lg"
+                        style={{ 
+                          backgroundColor: brandColors.accentGold,
+                          boxShadow: `0 0 15px ${brandColors.accentGold}80`
+                        }}>
+                    {basicNumber}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between items-center py-3" 
+                     style={{ borderColor: `${brandColors.accentGold}20` }}>
+                  <span className="font-medium" style={{ color: brandColors.neutralGray }}>Destiny Number</span>
+                  <span className="font-semibold w-10 h-10 rounded-full flex items-center justify-center text-white shadow-lg"
+                        style={{ 
+                          backgroundColor: brandColors.accentCyan,
+                          boxShadow: `0 0 15px ${brandColors.accentCyan}80`
+                        }}>
+                    {destinyNumber}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="rounded-2xl p-6 shadow-2xl backdrop-blur-sm" 
+                 style={{ 
+                   backgroundColor: `${brandColors.secondaryBg}cc`,
+                   border: `1px solid ${brandColors.accentGold}30`,
+                 }}>
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2" 
+                  style={{ color: brandColors.accentGold }}>
+                <span className="text-2xl">📊</span>
+                Numerology Summary
+              </h2>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-4 rounded-xl" style={{ backgroundColor: brandColors.primaryBg }}>
+                  <div className="text-2xl font-bold mb-1" style={{ color: brandColors.maha }}>{maha}</div>
+                  <div className="text-xs" style={{ color: brandColors.neutralGray }}>Mahadasha</div>
+                </div>
+                
+                <div className="text-center p-4 rounded-xl" style={{ backgroundColor: brandColors.primaryBg }}>
+                  <div className="text-2xl font-bold mb-1" style={{ color: brandColors.antar }}>{antar}</div>
+                  <div className="text-xs" style={{ color: brandColors.neutralGray }}>Antardasha</div>
+                </div>
+                
+                <div className="text-center p-4 rounded-xl" style={{ backgroundColor: brandColors.primaryBg }}>
+                  <div className="text-2xl font-bold mb-1" style={{ color: brandColors.accentGold }}>
+                    {Object.keys(numberFrequency).length}
+                  </div>
+                  <div className="text-xs" style={{ color: brandColors.neutralGray }}>Active Numbers</div>
+                </div>
+                
+                <div className="text-center p-4 rounded-xl" style={{ backgroundColor: brandColors.primaryBg }}>
+                  <div className="text-2xl font-bold mb-1" style={{ color: brandColors.accentCyan }}>
+                    {combinationBlocks.length}
+                  </div>
+                  <div className="text-xs" style={{ color: brandColors.neutralGray }}>Powerful Combinations</div>
+                </div>
+              </div>
+            </div>
           </div>
+        </section>
+
+        {/* Dasha Timeline Section */}
+<section className="mb-12">
+  <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: brandColors.accentGold }}>
+    Current Dasha Periods
+  </h2>
+  
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+    {/* Mahadasha Card */}
+    <div className="rounded-2xl p-6 shadow-2xl backdrop-blur-sm" 
+         style={{ 
+           backgroundColor: `${brandColors.secondaryBg}cc`,
+           border: `1px solid ${brandColors.maha}30`,
+           borderLeft: `4px solid ${brandColors.maha}`,
+         }}>
+      <div className="flex items-center gap-4 mb-4">
+        <div className="text-3xl">☀️</div>
+        <div>
+          <h3 className="font-bold text-lg" style={{ color: brandColors.maha }}>
+            Mahadasha {maha}
+          </h3>
+          <p className="text-sm" style={{ color: brandColors.neutralGray }}>
+            {mahaStart && mahaEnd ? (
+              `${mahaStart} to ${mahaEnd}`
+            ) : (
+              <span className="opacity-70">Active Period</span>
+            )}
+          </p>
         </div>
+      </div>
+      <p className="text-xs opacity-80">
+        {mahaStart && mahaEnd ? getDuration(mahaStart, mahaEnd) : 'Major planetary period influencing your life'}
+      </p>
+    </div>
+    
+    {/* Antardasha Card */}
+    <div className="rounded-2xl p-6 shadow-2xl backdrop-blur-sm" 
+         style={{ 
+           backgroundColor: `${brandColors.secondaryBg}cc`,
+           border: `1px solid ${brandColors.antar}30`,
+           borderLeft: `4px solid ${brandColors.antar}`,
+         }}>
+      <div className="flex items-center gap-4 mb-4">
+        <div className="text-3xl">🌙</div>
+        <div>
+          <h3 className="font-bold text-lg" style={{ color: brandColors.antar }}>
+            Antardasha {antar}
+          </h3>
+          <p className="text-sm" style={{ color: brandColors.neutralGray }}>
+            {antarStart && antarEnd ? (
+              `${antarStart} to ${antarEnd}`
+            ) : (
+              <span className="opacity-70">Current sub-period</span>
+            )}
+          </p>
+        </div>
+      </div>
+      <p className="text-xs opacity-80">
+        {antarStart && antarEnd ? getDuration(antarStart, antarEnd) : 'Sub-period within the main dasha cycle'}
+      </p>
+    </div>
+  </div>
+</section>
 
-        {/* Content Sections */}
-        <div className="space-y-12">
-          {/* Overview Section */}
-          {activeTab === 'overview' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Personal Info Card */}
-              <div className="rounded-2xl p-8 shadow-2xl backdrop-blur-sm" 
-                   style={{ 
-                     backgroundColor: `${brandColors.secondaryBg}cc`,
-                     border: `1px solid ${brandColors.accentGold}30`,
-                     backgroundImage: `linear-gradient(135deg, ${brandColors.secondaryBg} 0%, ${brandColors.primaryBg} 100%)`
-                   }}>
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3" 
-                    style={{ color: brandColors.accentGold }}>
-                  <span className="text-3xl">👤</span>
-                  Personal Information
-                </h2>
-                
-                <div className="space-y-6">
-                  <div className="flex justify-between items-center py-4 border-b" 
-                       style={{ borderColor: `${brandColors.accentGold}20` }}>
-                    <span className="font-medium" style={{ color: brandColors.neutralGray }}>Name</span>
-                    <span className="font-semibold text-xl">{name}</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center py-4 border-b" 
-                       style={{ borderColor: `${brandColors.accentGold}20` }}>
-                    <span className="font-medium" style={{ color: brandColors.neutralGray }}>Date of Birth</span>
-                    <span className="font-semibold text-xl">{dob}</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center py-4 border-b" 
-                       style={{ borderColor: `${brandColors.accentGold}20` }}>
-                    <span className="font-medium" style={{ color: brandColors.neutralGray }}>Basic Number</span>
-                    <span className="font-semibold text-xl w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg"
-                          style={{ 
-                            backgroundColor: brandColors.accentGold,
-                            boxShadow: `0 0 15px ${brandColors.accentGold}80`
-                          }}>
-                      {basicNumber}
-                    </span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center py-4" 
-                       style={{ borderColor: `${brandColors.accentGold}20` }}>
-                    <span className="font-medium" style={{ color: brandColors.neutralGray }}>Destiny Number</span>
-                    <span className="font-semibold text-xl w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg"
-                          style={{ 
-                            backgroundColor: brandColors.accentCyan,
-                            boxShadow: `0 0 15px ${brandColors.accentCyan}80`
-                          }}>
-                      {destinyNumber}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Stats */}
-              <div className="rounded-2xl p-8 shadow-2xl backdrop-blur-sm" 
-                   style={{ 
-                     backgroundColor: `${brandColors.secondaryBg}cc`,
-                     border: `1px solid ${brandColors.accentGold}30`,
-                     backgroundImage: `linear-gradient(135deg, ${brandColors.secondaryBg} 0%, ${brandColors.primaryBg} 100%)`
-                   }}>
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3" 
-                    style={{ color: brandColors.accentGold }}>
-                  <span className="text-3xl">📊</span>
-                  Numerology Summary
-                </h2>
-                
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="text-center p-4 rounded-xl" style={{ backgroundColor: brandColors.primaryBg }}>
-                    <div className="text-3xl font-bold mb-2" style={{ color: brandColors.maha }}>{maha}</div>
-                    <div className="text-sm" style={{ color: brandColors.neutralGray }}>Mahadasha</div>
-                  </div>
-                  
-                  <div className="text-center p-4 rounded-xl" style={{ backgroundColor: brandColors.primaryBg }}>
-                    <div className="text-3xl font-bold mb-2" style={{ color: brandColors.antar }}>{antar}</div>
-                    <div className="text-sm" style={{ color: brandColors.neutralGray }}>Antardasha</div>
-                  </div>
-                  
-                  <div className="text-center p-4 rounded-xl" style={{ backgroundColor: brandColors.primaryBg }}>
-                    <div className="text-3xl font-bold mb-2" style={{ color: brandColors.accentGold }}>
-                      {Object.keys(numberFrequency).length}
-                    </div>
-                    <div className="text-sm" style={{ color: brandColors.neutralGray }}>Active Numbers</div>
-                  </div>
-                  
-                  <div className="text-center p-4 rounded-xl" style={{ backgroundColor: brandColors.primaryBg }}>
-                    <div className="text-3xl font-bold mb-2" style={{ color: brandColors.accentCyan }}>
-                      {combinationBlocks.length}
-                    </div>
-                    <div className="text-sm" style={{ color: brandColors.neutralGray }}>Powerful Combinations</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Numerology Grid Section */}
-          {activeTab === 'grid' && (
-            <div className="text-center">
-              <h2 className="text-3xl font-bold mb-8" style={{ color: brandColors.accentGold }}>
-                Your Numerology Grid
-              </h2>
-              
-              <div className="flex justify-center mb-12">
-                <div className="grid grid-cols-3 gap-6 p-8 rounded-3xl max-w-md mx-auto shadow-2xl backdrop-blur-sm" 
-                     style={{ 
-                       backgroundColor: `${brandColors.secondaryBg}cc`,
-                       border: `2px solid ${brandColors.accentGold}`,
-                       boxShadow: `0 0 40px ${brandColors.accentGold}30`,
-                       backgroundImage: `radial-gradient(circle at center, ${brandColors.secondaryBg} 0%, ${brandColors.primaryBg} 100%)`
-                     }}>
-                  {grid.map((row, rIdx) =>
-                    row.map((cell, cIdx) => (
-                      <div key={`${rIdx}-${cIdx}`} 
-                           className="w-24 h-24 rounded-2xl flex justify-center items-center transition-all duration-300 hover:scale-110 hover:rotate-3"
-                           style={{ 
-                             backgroundColor: brandColors.primaryBg,
-                             border: `2px solid ${brandColors.accentGold}40`,
-                             boxShadow: `inset 0 4px 12px ${brandColors.primaryBg}80, 0 4px 12px ${brandColors.primaryBg}80`
-                           }}>
-                        <div className="flex flex-wrap justify-center items-center gap-1">
-                          {cell.map((item, i) => (
-                            <span
-                              key={i}
-                              className={`rounded-xl text-sm font-bold px-2 py-1 transition-all duration-200 ${
-                                item.highlight === 'maha' 
-                                  ? 'animate-pulse' 
-                                  : item.highlight === 'antar' 
-                                    ? 'shadow-lg' 
-                                    : ''
-                              }`}
-                              style={{
-                                backgroundColor: item.highlight === 'maha' 
-                                  ? brandColors.maha 
-                                  : item.highlight === 'antar' 
-                                    ? brandColors.antar 
-                                    : brandColors.regular,
-                                color: item.highlight ? brandColors.primaryBg : brandColors.textWhite,
-                                boxShadow: item.highlight ? `0 0 15px ${item.highlight === 'maha' ? brandColors.maha : brandColors.antar}80` : 'none'
-                              }}
-                            >
-                              {item.value}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-              
-              {/* Grid Legend */}
-              <div className="flex justify-center gap-8 mt-8 text-sm flex-wrap">
-                <div className="flex items-center gap-3 p-4 rounded-xl backdrop-blur-sm" 
-                     style={{ backgroundColor: `${brandColors.secondaryBg}cc` }}>
-                  <div className="w-5 h-5 rounded-lg shadow-lg" style={{ backgroundColor: brandColors.maha }}></div>
-                  <span className="font-semibold">Mahadasha</span>
-                </div>
-                <div className="flex items-center gap-3 p-4 rounded-xl backdrop-blur-sm" 
-                     style={{ backgroundColor: `${brandColors.secondaryBg}cc` }}>
-                  <div className="w-5 h-5 rounded-lg shadow-lg" style={{ backgroundColor: brandColors.antar }}></div>
-                  <span className="font-semibold">Antardasha</span>
-                </div>
-                <div className="flex items-center gap-3 p-4 rounded-xl backdrop-blur-sm" 
-                     style={{ backgroundColor: `${brandColors.secondaryBg}cc` }}>
-                  <div className="w-5 h-5 rounded-lg shadow-lg" style={{ backgroundColor: brandColors.regular }}></div>
-                  <span className="font-semibold">Regular Numbers</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Dasha Timeline Section */}
-          {activeTab === 'dasha' && (
-            <div>
-              <h2 className="text-3xl font-bold mb-12 text-center" style={{ color: brandColors.accentGold }}>
-                Your Current Dasha Periods
-              </h2>
-              
-              <div className="max-w-4xl mx-auto space-y-8">
-                {/* Mahadasha Card */}
-                {(mahaStart && mahaEnd) && (
-                  <div className="rounded-2xl p-8 shadow-2xl backdrop-blur-sm flex items-center gap-6 transition-all duration-300 hover:scale-105" 
+        {/* Numerology Grid Section */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: brandColors.accentGold }}>
+            Your Numerology Grid
+          </h2>
+          
+          <div className="flex justify-center mb-8">
+            <div className="grid grid-cols-3 gap-3 p-6 rounded-2xl max-w-xs mx-auto shadow-2xl backdrop-blur-sm" 
+                 style={{ 
+                   backgroundColor: `${brandColors.secondaryBg}cc`,
+                   border: `2px solid ${brandColors.accentGold}`,
+                   boxShadow: `0 0 30px ${brandColors.accentGold}30`,
+                 }}>
+              {grid.map((row, rIdx) =>
+                row.map((cell, cIdx) => (
+                  <div key={`${rIdx}-${cIdx}`} 
+                       className="w-16 h-16 md:w-20 md:h-20 rounded-xl flex justify-center items-center transition-all duration-300 hover:scale-105"
                        style={{ 
-                         backgroundColor: `${brandColors.secondaryBg}cc`,
-                         border: `1px solid ${brandColors.maha}30`,
-                         borderLeft: `6px solid ${brandColors.maha}`,
-                         backgroundImage: `linear-gradient(135deg, ${brandColors.secondaryBg} 0%, ${brandColors.primaryBg} 100%)`
+                         backgroundColor: brandColors.primaryBg,
+                         border: `2px solid ${brandColors.accentGold}40`,
                        }}>
-                    <div className="text-4xl">☀️</div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-2xl mb-2" style={{ color: brandColors.maha }}>
-                        Mahadasha {maha}
-                      </h3>
-                      <p className="text-lg mb-2" style={{ color: brandColors.neutralGray }}>
-                        {mahaStart} to {mahaEnd}
-                      </p>
-                      <p className="text-sm opacity-80">
-                        {getDuration(mahaStart, mahaEnd)}
-                      </p>
+                    <div className="flex flex-wrap justify-center items-center gap-1">
+                      {cell.map((item, i) => (
+                        <span
+                          key={i}
+                          className={`rounded-lg text-xs font-bold px-1.5 py-0.5 transition-all duration-200 ${
+                            item.highlight === 'maha' 
+                              ? 'animate-pulse' 
+                              : item.highlight === 'antar' 
+                                ? 'shadow-lg' 
+                                : ''
+                          }`}
+                          style={{
+                            background: item.highlight === 'maha' 
+                              ? brandColors.maha 
+                              : item.highlight === 'antar' 
+                                ? brandColors.antar 
+                                : brandColors.regular,
+                            color: item.highlight ? brandColors.primaryBg : brandColors.textWhite,
+                            boxShadow: item.highlight ? `0 0 10px ${item.highlight === 'maha' ? brandColors.maha : brandColors.antar}80` : 'none'
+                          }}
+                        >
+                          {item.value}
+                        </span>
+                      ))}
                     </div>
-                    <div className="text-right">
-                      <div className="text-5xl font-bold opacity-20" style={{ color: brandColors.maha }}>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+          
+          {/* Grid Legend */}
+          <div className="flex justify-center gap-4 mt-6 text-sm flex-wrap">
+            <div className="flex items-center gap-2 p-3 rounded-xl backdrop-blur-sm" 
+                 style={{ backgroundColor: `${brandColors.secondaryBg}cc` }}>
+              <div className="w-4 h-4 rounded-lg shadow-lg" style={{ backgroundColor: brandColors.maha }}></div>
+              <span className="font-semibold">Mahadasha</span>
+            </div>
+            <div className="flex items-center gap-2 p-3 rounded-xl backdrop-blur-sm" 
+                 style={{ backgroundColor: `${brandColors.secondaryBg}cc` }}>
+              <div className="w-4 h-4 rounded-lg shadow-lg" style={{ backgroundColor: brandColors.antar }}></div>
+              <span className="font-semibold">Antardasha</span>
+            </div>
+            <div className="flex items-center gap-2 p-3 rounded-xl backdrop-blur-sm" 
+                 style={{ backgroundColor: `${brandColors.secondaryBg}cc` }}>
+              <div className="w-4 h-4 rounded-lg" style={{ background: brandColors.regular }}></div>
+              <span className="font-semibold">Regular Numbers</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Insights Section */}
+        <section className="space-y-12">
+          {/* Mahadasha Insights */}
+          {mahaInsights.length > 0 && (
+            <div>
+              <h2 className="text-2xl font-bold text-center mb-8" style={{ color: brandColors.maha }}>
+                ☀️ Mahadasha Insights
+              </h2>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {mahaInsights.map((insight, i) => (
+                  <div
+                    key={i}
+                    className="rounded-2xl p-6 shadow-xl backdrop-blur-sm"
+                    style={{ 
+                      backgroundColor: `${brandColors.secondaryBg}cc`,
+                      border: `1px solid ${brandColors.maha}30`,
+                      borderTop: `3px solid ${brandColors.maha}`,
+                    }}
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-lg"
+                           style={{ 
+                             backgroundColor: brandColors.maha,
+                             boxShadow: `0 0 15px ${brandColors.maha}80`
+                           }}>
                         {maha}
                       </div>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Antardasha Card */}
-                {(antarStart && antarEnd) && (
-                  <div className="rounded-2xl p-8 shadow-2xl backdrop-blur-sm flex items-center gap-6 transition-all duration-300 hover:scale-105" 
-                       style={{ 
-                         backgroundColor: `${brandColors.secondaryBg}cc`,
-                         border: `1px solid ${brandColors.antar}30`,
-                         borderLeft: `6px solid ${brandColors.antar}`,
-                         backgroundImage: `linear-gradient(135deg, ${brandColors.secondaryBg} 0%, ${brandColors.primaryBg} 100%)`
-                       }}>
-                    <div className="text-4xl">🌙</div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-2xl mb-2" style={{ color: brandColors.antar }}>
-                        Antardasha {antar}
+                      <h3 className="text-lg font-bold" style={{ color: brandColors.maha }}>
+                        {insight.title}
                       </h3>
-                      <p className="text-lg mb-2" style={{ color: brandColors.neutralGray }}>
-                        {antarStart} to {antarEnd}
-                      </p>
-                      <p className="text-sm opacity-80">
-                        {getDuration(antarStart, antarEnd)}
-                      </p>
                     </div>
-                    <div className="text-right">
-                      <div className="text-5xl font-bold opacity-20" style={{ color: brandColors.antar }}>
-                        {antar}
-                      </div>
+                    
+                    <div className="space-y-4 text-sm">
+                      {insight.traits.length > 0 && (
+                        <div>
+                          <h4 className="font-semibold mb-2 flex items-center gap-2" 
+                              style={{ color: brandColors.accentGold }}>
+                            <span>🌟</span> Behavioral Patterns
+                          </h4>
+                          <ul className="space-y-1">
+                            {insight.traits.map((trait, idx) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <span style={{ color: brandColors.accentGold }}>•</span>
+                                <span>{trait}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      
+                      {insight.advice && (
+                        <div>
+                          <h4 className="font-semibold mb-2 flex items-center gap-2" 
+                              style={{ color: brandColors.success }}>
+                            <span>💡</span> Guidance
+                          </h4>
+                          <p className="italic" style={{ color: brandColors.success }}>
+                            {insight.advice}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
+                ))}
               </div>
             </div>
           )}
 
-          {/* Cosmic Insights Section */}
-          {activeTab === 'insights' && (
-            <div className="space-y-16">
-              {/* Mahadasha Insights */}
-              {mahaInsights.length > 0 && (
-                <div>
-                  <h2 className="text-3xl font-bold text-center mb-12" style={{ color: brandColors.maha }}>
-                    ☀️ Mahadasha Insights
-                  </h2>
-                  
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {mahaInsights.map((insight, i) => (
-                      <div
-                        key={i}
-                        className="rounded-2xl p-8 shadow-2xl backdrop-blur-sm transition-all duration-300 hover:shadow-3xl"
-                        style={{ 
-                          backgroundColor: `${brandColors.secondaryBg}cc`,
-                          border: `1px solid ${brandColors.maha}30`,
-                          borderTop: `4px solid ${brandColors.maha}`,
-                          backgroundImage: `linear-gradient(145deg, ${brandColors.secondaryBg} 0%, ${brandColors.primaryBg} 100%)`
-                        }}
-                      >
-                        <div className="flex items-center gap-4 mb-6">
-                          <div className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg"
-                               style={{ 
-                                 backgroundColor: brandColors.maha,
-                                 boxShadow: `0 0 20px ${brandColors.maha}80`
-                               }}>
-                            {maha}
-                          </div>
-                          <h3 className="text-xl font-bold" style={{ color: brandColors.maha }}>
-                            {insight.title}
-                          </h3>
-                        </div>
-                        
-                        <div className="space-y-6">
-                          {insight.traits.length > 0 && (
-                            <div>
-                              <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg" 
-                                  style={{ color: brandColors.accentGold }}>
-                                <span>🌟</span> Behavioral Patterns
-                              </h4>
-                              <ul className="space-y-2">
-                                {insight.traits.map((trait, idx) => (
-                                  <li key={idx} className="flex items-start gap-3">
-                                    <span className="mt-1" style={{ color: brandColors.accentGold }}>•</span>
-                                    <span>{trait}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          
-                          {insight.predictive.length > 0 && (
-                            <div>
-                              <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg" 
-                                  style={{ color: brandColors.accentCyan }}>
-                                <span>🔮</span> Predictive Insights
-                              </h4>
-                              <ul className="space-y-2">
-                                {insight.predictive.map((prediction, idx) => (
-                                  <li key={idx} className="flex items-start gap-3">
-                                    <span className="mt-1" style={{ color: brandColors.accentCyan }}>•</span>
-                                    <span>{prediction}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          
-                          {insight.advice && (
-                            <div>
-                              <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg" 
-                                  style={{ color: brandColors.success }}>
-                                <span>💡</span> Guidance & Advice
-                              </h4>
-                              <p className="italic pl-5 border-l-4" style={{ 
-                                borderColor: brandColors.success,
-                                color: brandColors.success 
-                              }}>
-                                {insight.advice}
-                              </p>
-                            </div>
-                          )}
-                        </div>
+          {/* Antardasha Insights */}
+          {antarInsights.length > 0 && (
+            <div>
+              <h2 className="text-2xl font-bold text-center mb-8" style={{ color: brandColors.antar }}>
+                🌙 Antardasha Insights
+              </h2>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {antarInsights.map((insight, i) => (
+                  <div
+                    key={i}
+                    className="rounded-2xl p-6 shadow-xl backdrop-blur-sm"
+                    style={{ 
+                      backgroundColor: `${brandColors.secondaryBg}cc`,
+                      border: `1px solid ${brandColors.antar}30`,
+                      borderTop: `3px solid ${brandColors.antar}`,
+                    }}
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-lg"
+                           style={{ 
+                             backgroundColor: brandColors.antar,
+                             boxShadow: `0 0 15px ${brandColors.antar}80`
+                           }}>
+                        {antar}
                       </div>
-                    ))}
+                      <h3 className="text-lg font-bold" style={{ color: brandColors.antar }}>
+                        {insight.title}
+                      </h3>
+                    </div>
+                    
+                    <div className="space-y-4 text-sm">
+                      {insight.traits.length > 0 && (
+                        <div>
+                          <h4 className="font-semibold mb-2 flex items-center gap-2" 
+                              style={{ color: brandColors.accentGold }}>
+                            <span>🌀</span> Current Energy
+                          </h4>
+                          <ul className="space-y-1">
+                            {insight.traits.map((trait, idx) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <span style={{ color: brandColors.accentGold }}>•</span>
+                                <span>{trait}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      
+                      {insight.advice && (
+                        <div>
+                          <h4 className="font-semibold mb-2 flex items-center gap-2" 
+                              style={{ color: brandColors.success }}>
+                            <span>🎯</span> Guidance
+                          </h4>
+                          <p className="italic" style={{ color: brandColors.success }}>
+                            {insight.advice}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                ))}
+              </div>
+            </div>
+          )}
 
-              {/* Antardasha Insights */}
-              {antarInsights.length > 0 && (
-                <div>
-                  <h2 className="text-3xl font-bold text-center mb-12" style={{ color: brandColors.antar }}>
-                    🌙 Antardasha Insights
-                  </h2>
-                  
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {antarInsights.map((insight, i) => (
-                      <div
-                        key={i}
-                        className="rounded-2xl p-8 shadow-2xl backdrop-blur-sm transition-all duration-300 hover:shadow-3xl"
-                        style={{ 
-                          backgroundColor: `${brandColors.secondaryBg}cc`,
-                          border: `1px solid ${brandColors.antar}30`,
-                          borderTop: `4px solid ${brandColors.antar}`,
-                          backgroundImage: `linear-gradient(145deg, ${brandColors.secondaryBg} 0%, ${brandColors.primaryBg} 100%)`
-                        }}
-                      >
-                        <div className="flex items-center gap-4 mb-6">
-                          <div className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg"
-                               style={{ 
-                                 backgroundColor: brandColors.antar,
-                                 boxShadow: `0 0 20px ${brandColors.antar}80`
-                               }}>
-                            {antar}
-                          </div>
-                          <h3 className="text-xl font-bold" style={{ color: brandColors.antar }}>
-                            {insight.title}
-                          </h3>
-                        </div>
-                        
-                        <div className="space-y-6">
-                          {insight.traits.length > 0 && (
-                            <div>
-                              <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg" 
-                                  style={{ color: brandColors.accentGold }}>
-                                <span>🌀</span> Current Energy Patterns
-                              </h4>
-                              <ul className="space-y-2">
-                                {insight.traits.map((trait, idx) => (
-                                  <li key={idx} className="flex items-start gap-3">
-                                    <span className="mt-1" style={{ color: brandColors.accentGold }}>•</span>
-                                    <span>{trait}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          
-                          {insight.predictive.length > 0 && (
-                            <div>
-                              <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg" 
-                                  style={{ color: brandColors.accentCyan }}>
-                                <span>📈</span> What to Expect
-                              </h4>
-                              <ul className="space-y-2">
-                                {insight.predictive.map((prediction, idx) => (
-                                  <li key={idx} className="flex items-start gap-3">
-                                    <span className="mt-1" style={{ color: brandColors.accentCyan }}>•</span>
-                                    <span>{prediction}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          
-                          {insight.advice && (
-                            <div>
-                              <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg" 
-                                  style={{ color: brandColors.success }}>
-                                <span>🎯</span> Recommended Approach
-                              </h4>
-                              <p className="italic pl-5 border-l-4" style={{ 
-                                borderColor: brandColors.success,
-                                color: brandColors.success 
-                              }}>
-                                {insight.advice}
-                              </p>
-                            </div>
-                          )}
-                        </div>
+          {/* Combination Insights */}
+          {combinationBlocks.length > 0 && (
+            <div>
+              <h2 className="text-2xl font-bold text-center mb-8" style={{ color: brandColors.accentGold }}>
+                ⚡ Powerful Number Combinations
+              </h2>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {combinationBlocks.map((block, i) => (
+                  <div
+                    key={i}
+                    className="rounded-2xl p-6 shadow-xl backdrop-blur-sm"
+                    style={{ 
+                      backgroundColor: `${brandColors.secondaryBg}cc`,
+                      border: `1px solid ${brandColors.accentGold}30`,
+                    }}
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg"
+                           style={{ 
+                             background: `linear-gradient(135deg, ${brandColors.accentGold} 0%, ${brandColors.highlightGold} 100%)`,
+                             boxShadow: `0 0 15px ${brandColors.accentGold}80`
+                           }}>
+                        ⚡
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Combination Insights */}
-              {combinationBlocks.length > 0 && (
-                <div>
-                  <h2 className="text-3xl font-bold text-center mb-12" style={{ color: brandColors.accentGold }}>
-                    ⚡ Powerful Number Combinations
-                  </h2>
-                  
-                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-                    {combinationBlocks.map((block, i) => (
-                      <div
-                        key={i}
-                        className="rounded-2xl p-8 shadow-2xl backdrop-blur-sm transition-all duration-300 hover:shadow-3xl hover:scale-105"
-                        style={{ 
-                          backgroundColor: `${brandColors.secondaryBg}cc`,
-                          border: `1px solid ${brandColors.accentGold}30`,
-                          backgroundImage: `linear-gradient(145deg, ${brandColors.secondaryBg} 0%, ${brandColors.primaryBg} 100%)`
-                        }}
-                      >
-                        <div className="flex items-center gap-4 mb-6">
-                          <div className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg"
-                               style={{ 
-                                 background: `linear-gradient(135deg, ${brandColors.accentGold} 0%, ${brandColors.highlightGold} 100%)`,
-                                 boxShadow: `0 0 20px ${brandColors.accentGold}80`
-                               }}>
-                            ⚡
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-bold" style={{ color: brandColors.accentGold }}>
-                              {block.title}
-                            </h3>
-                            <p className="text-sm opacity-70">{block.label}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-6">
-                          {block.behavioral.length > 0 && (
-                            <div>
-                              <h4 className="font-semibold mb-3 flex items-center gap-2" 
-                                  style={{ color: brandColors.accentGold }}>
-                                <span>🌟</span> Behavioral Traits
-                              </h4>
-                              <ul className="space-y-2">
-                                {block.behavioral.map((trait, idx) => (
-                                  <li key={idx} className="flex items-start gap-3">
-                                    <span className="mt-1" style={{ color: brandColors.accentGold }}>•</span>
-                                    <span className="text-sm">{trait}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          
-                          {block.professional.length > 0 && (
-                            <div>
-                              <h4 className="font-semibold mb-3 flex items-center gap-2" 
-                                  style={{ color: brandColors.success }}>
-                                <span>💼</span> Professional Strengths
-                              </h4>
-                              <ul className="space-y-2">
-                                {block.professional.map((prof, idx) => (
-                                  <li key={idx} className="flex items-start gap-3">
-                                    <span className="mt-1" style={{ color: brandColors.success }}>•</span>
-                                    <span className="text-sm">{prof}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          
-                          {block.negatives.length > 0 && (
-                            <div>
-                              <h4 className="font-semibold mb-3 flex items-center gap-2" 
-                                  style={{ color: brandColors.warning }}>
-                                <span>⚠️</span> Challenges & Negatives
-                              </h4>
-                              <ul className="space-y-2">
-                                {block.negatives.map((negative, idx) => (
-                                  <li key={idx} className="flex items-start gap-3">
-                                    <span className="mt-1" style={{ color: brandColors.warning }}>•</span>
-                                    <span className="text-sm">{negative}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          
-                          {block.notes.length > 0 && (
-                            <div>
-                              <h4 className="font-semibold mb-3 flex items-center gap-2" 
-                                  style={{ color: brandColors.accentCyan }}>
-                                <span>📝</span> Important Notes
-                              </h4>
-                              <ul className="space-y-2">
-                                {block.notes.map((note, idx) => (
-                                  <li key={idx} className="flex items-start gap-3">
-                                    <span className="mt-1" style={{ color: brandColors.accentCyan }}>•</span>
-                                    <span className="text-sm">{note}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
+                      <div>
+                        <h3 className="text-lg font-bold" style={{ color: brandColors.accentGold }}>
+                          {block.title}
+                        </h3>
+                        <p className="text-sm opacity-70">{block.label}</p>
                       </div>
-                    ))}
+                    </div>
+                    
+                    <div className="space-y-4 text-sm">
+                      {block.behavioral.length > 0 && (
+                        <div>
+                          <h4 className="font-semibold mb-2 flex items-center gap-2" 
+                              style={{ color: brandColors.accentGold }}>
+                            <span>🌟</span> Behavioral Traits
+                          </h4>
+                          <ul className="space-y-1">
+                            {block.behavioral.map((trait, idx) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <span style={{ color: brandColors.accentGold }}>•</span>
+                                <span>{trait}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      
+                      {block.notes.length > 0 && (
+                        <div>
+                          <h4 className="font-semibold mb-2 flex items-center gap-2" 
+                              style={{ color: brandColors.accentCyan }}>
+                            <span>📝</span> Important Notes
+                          </h4>
+                          <ul className="space-y-1">
+                            {block.notes.map((note, idx) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <span style={{ color: brandColors.accentCyan }}>•</span>
+                                <span>{note}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                ))}
+              </div>
             </div>
           )}
 
           {/* Individual Number Predictions */}
-          {activeTab === 'predictions' && predictionBlocks.length > 0 && (
+          {predictionBlocks.length > 0 && (
             <div>
-              <h2 className="text-3xl font-bold text-center mb-12" style={{ color: brandColors.accentGold }}>
-                📜 Individual Number Predictions
+              <h2 className="text-2xl font-bold text-center mb-8" style={{ color: brandColors.accentGold }}>
+                📜 Number Meanings
               </h2>
               
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {predictionBlocks.map((block, i) => (
                   <div
                     key={i}
-                    className="rounded-2xl p-8 shadow-2xl backdrop-blur-sm transition-all duration-300 hover:shadow-3xl hover:scale-105"
+                    className="rounded-2xl p-6 shadow-xl backdrop-blur-sm"
                     style={{ 
                       backgroundColor: `${brandColors.secondaryBg}cc`,
                       border: `1px solid ${getNumberColor(block.number)}30`,
-                      borderTop: `4px solid ${getNumberColor(block.number)}`,
-                      backgroundImage: `linear-gradient(145deg, ${brandColors.secondaryBg} 0%, ${brandColors.primaryBg} 100%)`
+                      borderTop: `3px solid ${getNumberColor(block.number)}`,
                     }}
                   >
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg"
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-lg"
                            style={{ 
                              backgroundColor: getNumberColor(block.number),
-                             boxShadow: `0 0 20px ${getNumberColor(block.number)}80`
+                             boxShadow: `0 0 15px ${getNumberColor(block.number)}80`
                            }}>
                         {block.number}
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold" style={{ color: getNumberColor(block.number) }}>
+                        <h3 className="text-lg font-bold" style={{ color: getNumberColor(block.number) }}>
                           {block.label}
                         </h3>
                         <p className="text-sm opacity-70">{block.content.label}</p>
                       </div>
                     </div>
                     
-                    <div className="space-y-6">
+                    <div className="space-y-4 text-sm">
                       {block.content.positives.length > 0 && (
                         <div>
-                          <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg" 
+                          <h4 className="font-semibold mb-2 flex items-center gap-2" 
                               style={{ color: brandColors.success }}>
                             <span>✨</span> Positive Traits
                           </h4>
-                          <ul className="space-y-2">
+                          <ul className="space-y-1">
                             {block.content.positives.map((positive, idx) => (
-                              <li key={idx} className="flex items-start gap-3">
-                                <span className="mt-1" style={{ color: brandColors.success }}>•</span>
+                              <li key={idx} className="flex items-start gap-2">
+                                <span style={{ color: brandColors.success }}>•</span>
                                 <span>{positive}</span>
                               </li>
                             ))}
@@ -2654,14 +2527,14 @@ export default function PredictionPage() {
                       
                       {block.content.negatives.length > 0 && (
                         <div>
-                          <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg" 
+                          <h4 className="font-semibold mb-2 flex items-center gap-2" 
                               style={{ color: brandColors.warning }}>
                             <span>⚠️</span> Challenges
                           </h4>
-                          <ul className="space-y-2">
+                          <ul className="space-y-1">
                             {block.content.negatives.map((negative, idx) => (
-                              <li key={idx} className="flex items-start gap-3">
-                                <span className="mt-1" style={{ color: brandColors.warning }}>•</span>
+                              <li key={idx} className="flex items-start gap-2">
+                                <span style={{ color: brandColors.warning }}>•</span>
                                 <span>{negative}</span>
                               </li>
                             ))}
@@ -2671,14 +2544,11 @@ export default function PredictionPage() {
                       
                       {block.content.advice && (
                         <div>
-                          <h4 className="font-semibold mb-3 flex items-center gap-2 text-lg" 
+                          <h4 className="font-semibold mb-2 flex items-center gap-2" 
                               style={{ color: brandColors.accentCyan }}>
                             <span>💡</span> Guidance
                           </h4>
-                          <p className="italic pl-5 border-l-4" style={{ 
-                            borderColor: brandColors.accentCyan,
-                            color: brandColors.accentCyan 
-                          }}>
+                          <p className="italic" style={{ color: brandColors.accentCyan }}>
                             {block.content.advice}
                           </p>
                         </div>
@@ -2689,16 +2559,16 @@ export default function PredictionPage() {
               </div>
             </div>
           )}
-        </div>
+        </section>
       </div>
 
       {/* Footer */}
-      <footer className="py-8 text-center mt-16 border-t relative z-10" 
+      <footer className="py-6 text-center mt-12 border-t relative z-10 px-4" 
               style={{ 
                 borderColor: `${brandColors.accentGold}20`,
                 backgroundColor: `${brandColors.secondaryBg}cc`
               }}>
-        <p className="opacity-70" style={{ color: brandColors.neutralGray }}>
+        <p className="opacity-70 text-sm" style={{ color: brandColors.neutralGray }}>
           Your personalized numerology reading • Created with cosmic energy ✨
         </p>
       </footer>
