@@ -80,27 +80,27 @@ export default function EntryForm() {
       </div>
 
       {/* DOB */}
-      <div className="mb-5 relative">
+<div className="mb-5 relative">
   <label className="block text-sm font-medium mb-2 text-[var(--accent-gold-light)]">
     Date of Birth
   </label>
 
+  {/* Date input */}
   <input
-    id="dob"
     type="date"
     value={dob}
     onChange={(e) => setDob(e.target.value)}
-    className="w-full px-4 py-2 bg-[#0b0f1a]/80 text-[var(--text-primary)] border border-[var(--line)] rounded-md focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] outline-none transition-all duration-200"
+    className="w-full px-4 py-2 bg-[#0b0f1a]/80 text-[var(--text-primary)] border border-[var(--line)] rounded-md focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] outline-none transition-all duration-200 placeholder:text-gray-500"
+    placeholder="dd-mm-yyyy"
     required
   />
 
-  {/* fake placeholder */}
-  {!dob && (
-    <span className="absolute left-4 top-[42px] text-gray-500 text-sm pointer-events-none">
-      dd/mm/yyyy
-    </span>
-  )}
+  {/* Fake placeholder for mobile only */}
+  <span className="absolute left-4 top-[2.9rem] text-gray-500 text-sm pointer-events-none sm:hidden">
+    dd/mm/yyyy
+  </span>
 </div>
+
 
 
       {/* Submit */}
