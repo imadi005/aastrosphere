@@ -89,19 +89,26 @@ export default function EntryForm() {
     type="date"
     value={dob}
     onChange={(e) => setDob(e.target.value)}
-    className="w-full px-4 py-3 bg-[#0b0f1a]/80 text-[var(--text-primary)] border border-[var(--line)] rounded-md focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] outline-none transition-all duration-200 relative z-10"
+    className="w-full px-4 py-3 bg-[#0b0f1a]/80 text-[var(--text-primary)] 
+               border border-[var(--line)] rounded-md 
+               focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] 
+               outline-none transition-all duration-200 relative z-10 
+               text-base appearance-none"
     required
   />
 
   {/* Mobile-only fake placeholder, vertically centered */}
   <span
-    className={`absolute left-4 inset-y-0 flex items-center pointer-events-none transition-opacity duration-200 sm:hidden text-gray-400 ${
-      dob ? 'opacity-0' : 'opacity-100'
+    className={`absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none 
+                transition-opacity duration-200 sm:hidden 
+                text-[var(--accent-gold-light)] text-base ${
+      dob ? 'opacity-0' : 'opacity-70'
     }`}
   >
-    <span className="text-sm leading-none">dd/mm/yyyy</span>
+    dd/mm/yyyy
   </span>
 </div>
+
 
 
 
